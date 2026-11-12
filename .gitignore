@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+dist/
+
+# Pipeline data: raw lives on the `data` branch (checked out into ./data), build output is disposable
+/data/
+/build/
+*.duckdb
+*.duckdb.wal
+
+# Node (dashboard, from M4)
+node_modules/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

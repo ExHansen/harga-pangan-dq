@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Recorded source responses are byte-exact evidence: their SHA-256 must survive checkout on any OS.
+tests/fixtures/** -text
+docs/phase0/samples/** -text
+*.gz binary
+*.parquet binary
