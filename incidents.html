@@ -71,7 +71,7 @@
     </div>
     <div class="card">
       <h3>File Data</h3>
-      <p><a href="data/site/incidents.json" download>Insiden JSON</a> · <a href="data/site/incidents.csv" download>Insiden CSV</a></p>
+      <p><a href="data/incidents.json" download>Insiden JSON</a> · <a href="data/incidents.csv" download>Insiden CSV</a></p>
     </div>
   </div>
   <footer class="site-footer">
@@ -80,7 +80,7 @@
     <p><strong>Penafian:</strong> Data ini untuk pemantauan kualitas data. Tidak untuk keputusan investasi atau keuangan.</p>
   </footer>
   <script>
-    fetch('data/site/incidents.json')
+    fetch('data/incidents.json')
       .then(r => r.json())
       .then(data => {
         var tbody = document.getElementById('incident-table');
