@@ -59,7 +59,14 @@ def check_anomaly(
     """
     incidents = []
 
-    for (commodity_id, province_iso_code), current_data in prices.items():
+    for key, current_data in prices.items():
+        # Handle both tuple keys and string keys (separated by ||)
+        if isinstance(key, tuple):
+            commodity_id, province_iso_code = key
+        else:
+            parts = key.split("||", 1)
+            commodity_id = parts[0]
+            province_iso_code = parts[1] if len(parts) > 1 else key
         current_price = current_data.get("price_idr")
         if current_price is None:
             continue
