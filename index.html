@@ -1,0 +1,134 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>harga-pangan-dq — Pemantauan Kualitas Data Harga Pangan</title>
+  <style>
+    :root {
+      --blue: #0969da; --green: #1a7f37; --red: #cf222e; --gray: #656d76;
+      --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: #24292f; background: var(--bg); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .site-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
+    }
+    .site-header h1 { font-size: 1.25rem; margin: 0; }
+    .site-header h1 a { color: inherit; text-decoration: none; }
+    .site-header nav a { margin-right: 1rem; font-size: 0.9rem; }
+    .site-footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gray); margin-top: 2rem;
+    }
+    .site-footer p { margin-bottom: 0.25rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; background: var(--surface); }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-ok { background: #dafae1; color: var(--green); }
+    .badge-warn { background: #fff8c5; color: #9a6700; }
+    .badge-err { background: #ffebe9; color: var(--red); }
+    .section-title { font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .hero { text-align: center; padding: 2rem 0; }
+    .hero h2 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .hero p { color: var(--gray); font-size: 1.1rem; }
+    .stats { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+    .stat { text-align: center; padding: 1rem; min-width: 120px; }
+    .stat .num { font-size: 2rem; font-weight: 700; color: var(--blue); }
+    .stat .label { font-size: 0.85rem; color: var(--gray); }
+    @media (max-width: 600px) {
+      .site-header { flex-direction: column; align-items: flex-start; }
+      .container { padding: 1rem; }
+      .hero h2 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1><a href="index.html">harga-pangan-dq</a></h1>
+    <nav>
+      <a href="latest.html">Harga terbaru</a>
+      <a href="trends.html">Tren komoditas</a>
+      <a href="health.html">Kesehatan data</a>
+      <a href="incidents.html">Insiden</a>
+      <a href="about.html">Tentang</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="hero">
+      <h2>Pemantauan Kualitas Data Harga Pangan</h2>
+      <p>Data harga pangan strategis Indonesia secara real-time dari PIHPS Nasional (Bank Indonesia).</p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stat-commodities">—</div><div class="label">Komoditas</div></div>
+        <div class="stat"><div class="num" id="stat-provinces">—</div><div class="label">Provinsi</div></div>
+        <div class="stat"><div class="num" id="stat-dates">—</div><div class="label">Hari Data</div></div>
+        <div class="stat"><div class="num" id="stat-incidents">—</div><div class="label">Insiden Aktif</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Selamat Datang</h3>
+      <p>
+        <strong>harga-pangan-dq</strong> adalah sistem pemantauan kualitas data secara langsung
+        untuk harga pangan strategis Indonesia. Setiap hari kerja, sistem mengumpulkan harga
+        provinsi dari <a href="https://www.bi.go.id/id/moneter/diskusi-komitte/pihps-nasional.aspx" target="_blank" rel="noopener">PIHPS Nasional</a>,
+        memodelkannya dengan dbt, menjalankan check kualitas data, dan mempublikasikan dashboard ini.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Navigasi Cepat</h3>
+      <table>
+        <tr><th>Halaman</th><th>Deskripsi</th></tr>
+        <tr><td><a href="latest.html">Harga Terbaru</a></td><td>Harga per komoditas per provinsi, perubahan harian &amp; mingguan</td></tr>
+        <tr><td><a href="trends.html">Tren Komoditas</a></td><td>Volatilitas dan gap harga ke nasional</td></tr>
+        <tr><td><a href="health.html">Kesehatan Data</a></td><td>Status check kualitas data dan kontrak dbt</td></tr>
+        <tr><td><a href="incidents.html">Insiden</a></td><td>Catatan insiden dari semua check</td></tr>
+        <tr><td><a href="about.html">Tentang</a></td><td>Arsitektur, sumber data, informasi proyek</td></tr>
+      </table>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p><strong>Sumber data:</strong> <a href="https://www.bi.go.id/id/moneter/diskusi-komitte/pihps-nasional.aspx" target="_blank" rel="noopener">PIHPS Nasional — Bank Indonesia</a></p>
+    <p><strong>Sitasi:</strong> harga-pangan-dq &lt;<a href="https://github.com/ExHansen/harga-pangan-dq" target="_blank" rel="noopener">github.com/ExHansen/harga-pangan-dq</a>&gt;.</p>
+    <p><strong>Penafian:</strong> Data ini untuk pemantauan kualitas data. Tidak untuk keputusan investasi atau keuangan.</p>
+  </footer>
+  <script>
+    // Load summary stats from health and incidents data
+    Promise.all([
+      fetch('data/health.json').then(r => r.json()).catch(() => null),
+      fetch('data/incidents.json').then(r => r.json()).catch(() => null),
+      fetch('data/latest_prices.json').then(r => r.json()).catch(() => null),
+    ]).then(function(results) {
+      var health = results[0] || {};
+      var incidents = results[1] || {};
+      var prices = results[2] || {};
+
+      // Count unique commodities and provinces from latest prices
+      var commodities = new Set();
+      var provinces = new Set();
+      var dates = new Set();
+      (prices.rows || []).forEach(function(r) {
+        if (r.commodity_name) commodities.add(r.commodity_name);
+        if (r.source_province_name) provinces.add(r.source_province_name);
+        if (r.price_date) dates.add(r.price_date);
+      });
+
+      document.getElementById('stat-commodities').textContent = commodities.size || '—';
+      document.getElementById('stat-provinces').textContent = provinces.size || '—';
+      document.getElementById('stat-dates').textContent = dates.size || '—';
+
+      // Count active incidents
+      var active = (incidents.events || []).filter(function(e) { return !e.resolved; }).length;
+      document.getElementById('stat-incidents').textContent = active || '0';
+    });
+  </script>
+</body>
+</html>

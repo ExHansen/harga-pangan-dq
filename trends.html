@@ -1,0 +1,118 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tren Komoditas — harga-pangan-dq</title>
+  <style>
+    :root {
+      --blue: #0969da; --green: #1a7f37; --red: #cf222e; --gray: #656d76;
+      --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: #24292f; background: var(--bg); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .site-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
+    }
+    .site-header h1 { font-size: 1.25rem; margin: 0; }
+    .site-header h1 a { color: inherit; text-decoration: none; }
+    .site-header nav a { margin-right: 1rem; font-size: 0.9rem; }
+    .site-footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gray); margin-top: 2rem;
+    }
+    .site-footer p { margin-bottom: 0.25rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; background: var(--surface); }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-ok { background: #dafae1; color: var(--green); }
+    .badge-warn { background: #fff8c5; color: #9a6700; }
+    .badge-err { background: #ffebe9; color: var(--red); }
+    .section-title { font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    @media (max-width: 600px) {
+      .site-header { flex-direction: column; align-items: flex-start; }
+      .container { padding: 1rem; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.3rem 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1><a href="index.html">harga-pangan-dq</a></h1>
+    <nav>
+      <a href="latest.html">Harga terbaru</a>
+      <a href="trends.html">Tren komoditas</a>
+      <a href="health.html">Kesehatan data</a>
+      <a href="incidents.html">Insiden</a>
+      <a href="about.html">Tentang</a>
+    </nav>
+  </header>
+  <div class="container">
+    <h2 class="section-title">Tren Komoditas</h2>
+    <div class="card">
+      <h3>Volatilitas Per Komoditas</h3>
+      <p>Volatilitas = simpangan baku log return harian, dihitung dari 60 observasi terakhir.</p>
+      <table>
+        <thead>
+          <tr><th>Komoditas</th><th>Wilayah</th><th>Volatilitas (60)</th><th>Mean |DoD|</th><th>Max |DoD|</th><th>Observasi</th></tr>
+        </thead>
+        <tbody id="vol-table"><tr><td colspan="6" style="text-align:center;">Memuat data…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Perbandingan Harga ke Nasional</h3>
+      <p>Gap harian ke rata-rata nasional (%) untuk setiap provinsi sumber.</p>
+      <table>
+        <thead>
+          <tr><th>Komoditas</th><th>Provinsi</th><th>Gap ke Nasional (%)</th><th>Tanggal</th></tr>
+        </thead>
+        <tbody id="gap-table"><tr><td colspan="4" style="text-align:center;">Memuat data…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>File Data</h3>
+      <p><a href="data/volatility.csv" download>Volatilitas CSV</a> · <a href="data/volatility.json" download>Volatilitas JSON</a></p>
+      <p><a href="data/gap_to_national.csv" download>Gap CSV</a> · <a href="data/gap_to_national.json" download>Gap JSON</a></p>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p><strong>Sumber data:</strong> <a href="https://www.bi.go.id/id/moneter/diskusi-komitte/pihps-nasional.aspx" target="_blank" rel="noopener">PIHPS Nasional — Bank Indonesia</a></p>
+    <p><strong>Sitasi:</strong> harga-pangan-dq &lt;<a href="https://github.com/ExHansen/harga-pangan-dq" target="_blank" rel="noopener">github.com/ExHansen/harga-pangan-dq</a>&gt;.</p>
+    <p><strong>Penafian:</strong> Data ini untuk pemantauan kualitas data. Tidak untuk keputusan investasi atau keuangan.</p>
+  </footer>
+  <script>
+    function loadJSON(path, containerId, renderFn) {
+      fetch(path).then(r => r.json()).then(data => {
+        var el = document.getElementById(containerId);
+        if (!data.rows || data.rows.length === 0) {
+          el.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada data.</td></tr>';
+          return;
+        }
+        el.innerHTML = renderFn(data.rows);
+      }).catch(function() {
+        document.getElementById(containerId).innerHTML = '<tr><td colspan="6" style="text-align:center;">Gagal memuat data.</td></tr>';
+      });
+    }
+    loadJSON('data/volatility.json', 'vol-table', function(rows) {
+      return rows.map(function(r) {
+        return '<tr><td>' + (r.commodity_name || '—') + '</td><td>' + r.area_name + '</td><td>' + (r.volatility_60 != null ? r.volatility_60.toFixed(4) : '—') + '</td><td>' + (r.mean_abs_dod_pct != null ? (r.mean_abs_dod_pct * 100).toFixed(2) + '%' : '—') + '</td><td>' + (r.max_abs_dod_pct != null ? (r.max_abs_dod_pct * 100).toFixed(2) + '%' : '—') + '</td><td>' + (r.n_returns !== undefined ? r.n_returns : '—') + '</td></tr>';
+      }).join('');
+    });
+    loadJSON('data/gap_to_national.json', 'gap-table', function(rows) {
+      return rows.slice(0, 100).map(function(r) {
+        return '<tr><td>' + (r.commodity_name || '—') + '</td><td>' + r.source_province_name + '</td><td>' + (r.gap_to_national_pct != null ? r.gap_to_national_pct.toFixed(1) + '%' : '—') + '</td><td>' + (r.price_date || '—') + '</td></tr>';
+      }).join('');
+    });
+  </script>
+</body>
+</html>
