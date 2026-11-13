@@ -40,9 +40,10 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
     if not rows:
         path.write_text("", encoding="utf-8")
         return
-    writer = csv.DictWriter(path, fieldnames=rows[0].keys(), lineterminator="\n", extrasaction="ignore")
-    writer.writeheader()
-    writer.writerows(rows)
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys(), lineterminator="\n", extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
     logger.info("wrote %s (%d rows)", path, len(rows))
 
 
