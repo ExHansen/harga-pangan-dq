@@ -1,0 +1,72 @@
+name: backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date (YYYY-MM-DD)"
+        required: true
+      end:
+        description: "End date (YYYY-MM-DD)"
+        required: true
+      group:
+        description: "Commodity group (all | chillies)"
+        required: false
+        default: "all"
+
+permissions:
+  contents: write
+
+env:
+  HPDQ_DATA_DIR: ${{ github.workspace }}/data
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  backfill:
+    name: backfill
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Install (locked)
+        run: uv sync --locked
+
+      # --- Backfill ---
+      - name: Backfill
+        run: |
+          if [ "${{ github.event.inputs.group }}" != "all" ]; then
+            uv run hpdq backfill --group ${{ github.event.inputs.group }} ${{ github.event.inputs.start }} ${{ github.event.inputs.end }}
+          else
+            uv run hpdq backfill ${{ github.event.inputs.start }} ${{ github.event.inputs.end }}
+          fi
+
+      # --- Append-only assertion ---
+      - name: Verify append-only
+        run: uv run hpdq raw verify
+
+      # --- Rebuild dbt marts ---
+      - name: Build dbt
+        run: uv run hpdq build
+
+      # --- Commit data ---
+      - name: Push data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B data origin/data 2>/dev/null || git checkout -b data
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "backfill: ${{ github.event.inputs.start }}..${{ github.event.inputs.end }}"
+            git push origin data
+          fi

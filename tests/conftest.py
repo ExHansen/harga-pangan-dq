@@ -12,8 +12,9 @@ import pytest
 from support import FakeTime, MockPihps, block_network
 
 
-@pytest.fixture(autouse=True)
-def _no_network(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+@pytest.fixture
+def no_network(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Block all network access for tests that need isolation."""
     monkeypatch.setattr(socket.socket, "connect", block_network)
     monkeypatch.setattr(socket.socket, "connect_ex", block_network)
     monkeypatch.setattr(socket, "create_connection", block_network)

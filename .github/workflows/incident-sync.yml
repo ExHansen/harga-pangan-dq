@@ -1,0 +1,51 @@
+name: incident-sync
+on:
+  schedule:
+    # Run at 14:20 WIB and 17:20 WIB (UTC+7)
+    # 14:20 WIB = 07:20 UTC
+    # 17:20 WIB = 10:20 UTC
+    - cron: "20 7 * * 1-5"
+    - cron: "20 10 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Business date (YYYY-MM-DD)"
+        required: false
+        default: ""
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  sync-incidents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run incident sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HPDQ_DATA_DIR: ${{ github.workspace }}/data
+        run: |
+          python -m hpdq.checks.sync_incidents
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "harga-pangan-dq-bot"
+          git config user.email "bot@harga-pangan-dq.dev"
+          git add .
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "chore: sync incidents from data quality checks"
+            git push
+          fi

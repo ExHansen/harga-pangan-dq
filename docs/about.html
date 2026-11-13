@@ -1,0 +1,126 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tentang — harga-pangan-dq</title>
+  <style>
+    :root {
+      --blue: #0969da; --green: #1a7f37; --red: #cf222e; --gray: #656d76;
+      --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: #24292f; background: var(--bg); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .site-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
+    }
+    .site-header h1 { font-size: 1.25rem; margin: 0; }
+    .site-header h1 a { color: inherit; text-decoration: none; }
+    .site-header nav a { margin-right: 1rem; font-size: 0.9rem; }
+    .site-footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gray); margin-top: 2rem;
+    }
+    .site-footer p { margin-bottom: 0.25rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; background: var(--surface); }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-ok { background: #dafae1; color: var(--green); }
+    .badge-warn { background: #fff8c5; color: #9a6700; }
+    .badge-err { background: #ffebe9; color: var(--red); }
+    .section-title { font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    pre code { background: var(--surface); padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+    pre { background: var(--surface); padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    ol { padding-left: 1.5rem; }
+    @media (max-width: 600px) {
+      .site-header { flex-direction: column; align-items: flex-start; }
+      .container { padding: 1rem; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.3rem 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1><a href="index.html">harga-pangan-dq</a></h1>
+    <nav>
+      <a href="latest.html">Harga terbaru</a>
+      <a href="trends.html">Tren komoditas</a>
+      <a href="health.html">Kesehatan data</a>
+      <a href="incidents.html">Insiden</a>
+      <a href="about.html">Tentang</a>
+    </nav>
+  </header>
+  <div class="container">
+    <h2 class="section-title">Tentang</h2>
+    <div class="card">
+      <h3>harga-pangan-dq</h3>
+      <p>Sistem pemantauan kualitas data secara langsung untuk harga pangan strategis Indonesia (PIHPS Nasional dari Bank Indonesia).</p>
+      <p>Setiap hari kerja, sistem mengumpulkan harga provinsi dari PIHPS Nasional, memodelkannya dengan dbt, menjalankan check kualitas data, dan mempublikasikan dashboard yang menampilkan harga serta kesehatan data.</p>
+    </div>
+    <div class="card">
+      <h3>Arsitektur</h3>
+      <pre><code>PIHPS API
+    ↓ (ingest, rate-limited, immutable storage)
+Raw Store (.json.gz)
+    ↓ (hpdq load → Parquet)
+Parsed Tables (DuckDB)
+    ↓ (dbt build)
+Marts: fct_price_daily, dim_commodity, dim_province, agg_volatility
+    ↓ (hpdq check)
+Incident Store (SQLite)
+    ↓ (sync_incidents)
+GitHub Issues
+    ↓
+GitHub Pages (situs ini)
+</code></pre>
+    </div>
+    <div class="card">
+      <h3>Sumber Data</h3>
+      <p><a href="https://www.bi.go.id/id/moneter/diskusi-komitte/pihps-nasional.aspx" target="_blank" rel="noopener">PIHPS Nasional (Pasar Indeks Harga Consumtor Indonesia) — Bank Indonesia</a></p>
+      <p>PIHPS mengumpulkan harga 21 komoditas pangan strategis di pasar tradisional seluruh Indonesia, termasuk harga nasional dan per provinsi/kota.</p>
+    </div>
+    <div class="card">
+      <h3>Check Kualitas Data</h3>
+      <ol>
+        <li><strong>Freshness</strong> — data hari ini tersedia tepat waktu</li>
+        <li><strong>Completeness</strong> — semua komoditas × provinsi terlaporkan</li>
+        <li><strong>Validity</strong> — harga &gt; 0, satuan benar, dalam rentang masuk akal</li>
+        <li><strong>Duplicates</strong> — (komoditas, wilayah, tanggal) unik</li>
+        <li><strong>Schema Drift</strong> — struktur response tidak berubah</li>
+        <li><strong>Anomaly</strong> — guncangan harga dibedakan dari kesalahan data</li>
+        <li><strong>Reconciliation</strong> — provinsi vs kota, nasional vs provinsi</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Informasi Proyek</h3>
+      <table>
+        <tr><th>Repository</th><td><a href="https://github.com/ExHansen/harga-pangan-dq" target="_blank" rel="noopener">github.com/ExHansen/harga-pangan-dq</a></td></tr>
+        <tr><th>Lisensi</th><td>MIT</td></tr>
+        <tr><th>Python</th><td>3.12</td></tr>
+        <tr><th>Database</th><td>DuckDB (via dbt-duckdb)</td></tr>
+        <tr><th>CI/CD</th><td>GitHub Actions</td></tr>
+        <tr><th>Deploy</th><td>GitHub Pages (branch: <code>data</code>)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Penafian</h3>
+      <p>Data ini disediakan untuk pemantauan kualitas data dan penelitian. Bukan untuk keputusan investasi atau keuangan. Kontributor tidak bertanggung jawab atas penggunaan informasi yang terdapat di situs ini.</p>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p><strong>Sumber data:</strong> <a href="https://www.bi.go.id/id/moneter/diskusi-komitte/pihps-nasional.aspx" target="_blank" rel="noopener">PIHPS Nasional — Bank Indonesia</a></p>
+    <p><strong>Sitasi:</strong> harga-pangan-dq &lt;<a href="https://github.com/ExHansen/harga-pangan-dq" target="_blank" rel="noopener">github.com/ExHansen/harga-pangan-dq</a>&gt;.</p>
+    <p><strong>Penafian:</strong> Data ini untuk pemantauan kualitas data. Tidak untuk keputusan investasi atau keuangan.</p>
+  </footer>
+</body>
+</html>
