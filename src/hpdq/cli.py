@@ -276,25 +276,216 @@ def check(
     # Load incident store
     store = IncidentStore(build_dir)
 
-    # Get prices from parsed data
-    prices_path = parsed_dir / "prices.parquet"
-    if not prices_path.exists():
-        typer.echo("No parsed prices found. Run `hpdq load` first.", err=True)
-        raise typer.Exit(code=1)
-
-    # For now, we'll use a simplified approach
-    # In production, this would read from Parquet
-    typer.echo(f"Running data quality checks for D={business_date.date().isoformat()}")
+    warehouse = build_dir / "warehouse.duckdb"
+    typer.echo(f"Running data quality checks for D={business_date.isoformat()}")
     typer.echo(f"Parsed {summary.cells} cells from {summary.snapshots} snapshots")
 
-    # Get dbt data
-    paths = DbtPaths.under(build_dir)
-    if not run_dbt(["parse"], paths):
-        typer.echo("dbt parse failed", err=True)
-        raise typer.Exit(code=1)
+    # Query the warehouse for data needed by checks
+    if warehouse.exists():
+        import duckdb
 
-    # Run checks
-    # This is a simplified version - full implementation would load all required data
+        con = duckdb.connect(str(warehouse))
+        con.execute("SET TimeZone = 'UTC'")
+
+        # Latest national snapshot date
+        row = con.execute(
+            "SELECT MAX(price_date) FROM fct_price_national_daily"
+        ).fetchone()
+        latest_national_snapshot = row[0] if row and row[0] else None
+
+        # Volatile commodities (top 5 by 60-day volatility)
+        volatile_rows = con.execute(
+            "SELECT commodity_id, volatility_60 FROM agg_volatility "
+            "ORDER BY volatility_60 DESC NULLS LAST LIMIT 5"
+        ).fetchall()
+        volatile_commodities = [str(r[0]) for r in volatile_rows if r[0]]
+
+        # Latest volatile snapshot dates & price pairs
+        latest_volatile_snapshots: dict[str, object] = {}
+        previous_prices: dict[str, dict[str, float]] = {}
+        current_volatile_prices: dict[str, dict[str, float]] = {}
+        for commodity_id in volatile_commodities:
+            rows = con.execute(
+                "SELECT source_province_name, price_idr, price_date "
+                "FROM fct_price_daily WHERE commodity_id = ? "
+                "ORDER BY price_date DESC LIMIT 2",
+                (commodity_id,),
+            ).fetchall()
+            if rows:
+                latest_volatile_snapshots[str(commodity_id)] = rows[0][2]
+            if len(rows) >= 2:
+                previous_prices[str(commodity_id)] = {
+                    str(rows[1][0]): float(rows[1][1])
+                }
+            if rows:
+                current_volatile_prices[str(commodity_id)] = {
+                    str(rows[0][0]): float(rows[0][1])
+                }
+
+        # Completeness: expected vs reported commodity x province
+        expected_combinations: set[tuple[str, str]] = set()
+        for c in con.execute("SELECT commodity_id FROM dim_commodity").fetchall():
+            for p in con.execute(
+                "SELECT source_province_name FROM dim_source_province"
+            ).fetchall():
+                expected_combinations.add((str(c[0]), str(p[0])))
+        reported_combinations: set[tuple[str, str]] = {
+            (str(r[0]), str(r[1]))
+            for r in con.execute(
+                "SELECT DISTINCT commodity_id, source_province_name FROM fct_price_daily"
+            ).fetchall()
+        }
+
+        # Validity: prices, plausible ranges, expected units
+        prices: dict[tuple[str, str, str], float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, price_idr, price_date "
+            "FROM fct_price_daily"
+        ).fetchall():
+            prices[(str(r[0]), str(r[1]), str(r[3]))] = float(r[2])
+        plausible_ranges: dict[str, dict[str, float]] = {}
+        expected_units: dict[str, str] = {}
+        for r in con.execute(
+            "SELECT commodity_id, plausible_min_idr, plausible_max_idr, unit "
+            "FROM dim_commodity"
+        ).fetchall():
+            plausible_ranges[str(r[0])] = {"min": float(r[1]), "max": float(r[2])}
+            expected_units[str(r[0])] = str(r[3])
+
+        # Anomaly: historical prices, national prices
+        historical_prices: dict[tuple[str, str], list[float]] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, price_idr, price_date "
+            "FROM fct_price_daily"
+        ).fetchall():
+            key = (str(r[0]), str(r[1]))
+            historical_prices.setdefault(key, []).append(float(r[2]))
+        national_prices: dict[tuple[str, str], float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, price_idr, price_date FROM fct_price_national_daily"
+        ).fetchall():
+            national_prices[(str(r[0]), str(r[2]))] = float(r[1])
+
+        # Reconciliation: province vs city vs national
+        province_prices: dict[tuple[str, str, str], float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, price_idr, price_date "
+            "FROM fct_price_daily"
+        ).fetchall():
+            province_prices[(str(r[0]), str(r[1]), str(r[3]))] = float(r[2])
+        city_prices: dict[tuple[str, str, str, str], float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, city_name, price_idr, price_date "
+            "FROM fct_price_city_daily"
+        ).fetchall():
+            city_prices[(str(r[0]), str(r[1]), str(r[2]), str(r[4]))] = float(r[3])
+
+        # Duplicates: raw price rows from warehouse
+        duplicate_rows: list[dict] = []
+        for r in con.execute(
+            "SELECT snapshot_id, commodity_id, source_province_name AS area_key, "
+            "price_idr, price_date FROM fct_price_daily"
+        ).fetchall():
+            duplicate_rows.append({
+                "snapshot_id": str(r[0]),
+                "commodity_id": str(r[1]),
+                "area_key": str(r[2]),
+                "price_idr": float(r[3]),
+                "price_date": str(r[4]),
+            })
+
+        # Schema drift: snapshot metadata
+        snapshot_rows: list[dict] = []
+        for r in con.execute(
+            "SELECT snapshot_id, sha256 AS fingerprint, request_key FROM stg_pihps__snapshots"
+        ).fetchall():
+            snapshot_rows.append({
+                "snapshot_id": str(r[0]),
+                "fingerprint": str(r[1]) if r[1] else "",
+                "request_key": str(r[2]) if r[2] else "",
+            })
+        expected_fingerprints: dict[str, str] = {}
+
+        # Anomaly: prices dict for anomaly check
+        anomaly_prices: dict[str, dict[str, object]] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, price_idr, price_date "
+            "FROM fct_price_daily"
+        ).fetchall():
+            key = f"{str(r[0])}||{str(r[1])}"
+            anomaly_prices[key] = {
+                "price_idr": float(r[2]),
+                "price_date": str(r[3]),
+            }
+        national_prices_anomaly: dict[str, float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, price_idr FROM fct_price_national_daily"
+        ).fetchall():
+            national_prices_anomaly[str(r[0])] = float(r[1])
+
+        # Province neighbor mapping (same island group)
+        neighbor_provinces: dict[str, list[str]] = {}
+        for r in con.execute(
+            "SELECT p1.source_province_name, p2.source_province_name "
+            "FROM dim_province p1 JOIN dim_province p2 ON p1.island_group = p2.island_group "
+            "WHERE p1.source_province_name != p2.source_province_name"
+        ).fetchall():
+            neighbor_provinces.setdefault(str(r[0]), []).append(str(r[1]))
+
+        # Reconciliation: province-level prices
+        province_prices_recon: dict[str, float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, price_idr "
+            "FROM fct_price_daily"
+        ).fetchall():
+            key = f"{str(r[0])}||{str(r[1])}"
+            province_prices_recon[key] = float(r[2])
+
+        # Reconciliation: city-level prices
+        city_prices_recon: dict[str, list[dict]] = {}
+        for r in con.execute(
+            "SELECT commodity_id, source_province_name, city_name, price_idr "
+            "FROM fct_price_city_daily"
+        ).fetchall():
+            key = f"{str(r[0])}||{str(r[1])}"
+            city_prices_recon.setdefault(key, []).append({
+                "city_name": str(r[2]),
+                "price_idr": float(r[3]),
+            })
+
+        # Reconciliation: national prices
+        national_prices_recon: dict[str, float] = {}
+        for r in con.execute(
+            "SELECT commodity_id, price_idr FROM fct_price_national_daily"
+        ).fetchall():
+            national_prices_recon[str(r[0])] = float(r[1])
+
+        con.close()
+    else:
+        latest_national_snapshot = None
+        volatile_commodities = []
+        latest_volatile_snapshots = {}
+        previous_prices = {}
+        current_volatile_prices = {}
+        expected_combinations = set()
+        reported_combinations = set()
+        prices = {}
+        plausible_ranges = {}
+        expected_units = {}
+        historical_prices = {}
+        national_prices = {}
+        province_prices = {}
+        city_prices = {}
+        duplicate_rows = []
+        snapshot_rows = []
+        expected_fingerprints = {}
+        anomaly_prices = {}
+        national_prices_anomaly = {}
+        neighbor_provinces = {}
+        province_prices_recon = {}
+        city_prices_recon = {}
+        national_prices_recon = {}
+
     from hpdq.checks import (
         check_anomaly,
         check_completeness,
@@ -314,14 +505,17 @@ def check(
 
     # Check 1: Freshness
     typer.echo("Running freshness check...")
+    now = datetime.now(timezone.utc)
+    expected_publication_time = now.replace(hour=14, minute=0, second=0, microsecond=0)
+    cutoff_time = now.replace(hour=17, minute=0, second=0, microsecond=0)
     freshness_incidents = check_freshness(
-        expected_publication_time=datetime(14, 0, 0, tzinfo=timezone.utc),
-        cutoff_time=datetime(17, 0, 0, tzinfo=timezone.utc),
-        latest_national_snapshot=None,
-        volatile_commodities=[],
-        latest_volatile_snapshots={},
-        previous_prices={},
-        current_volatile_prices={},
+        expected_publication_time=expected_publication_time,
+        cutoff_time=cutoff_time,
+        latest_national_snapshot=latest_national_snapshot,
+        volatile_commodities=volatile_commodities,
+        latest_volatile_snapshots=latest_volatile_snapshots,
+        previous_prices=previous_prices,
+        current_volatile_prices=current_volatile_prices,
     )
     result["checks"].append({"name": "freshness", "passed": len(freshness_incidents) == 0})
     for incident in freshness_incidents:
@@ -330,8 +524,8 @@ def check(
     # Check 2: Completeness
     typer.echo("Running completeness check...")
     completeness_incidents = check_completeness(
-        expected_combinations=set(),
-        reported_combinations=set(),
+        expected_combinations=expected_combinations,
+        reported_combinations=reported_combinations,
         historical_reporting={},
     )
     result["checks"].append({"name": "completeness", "passed": len(completeness_incidents) == 0})
@@ -340,10 +534,19 @@ def check(
 
     # Check 3: Validity
     typer.echo("Running validity check...")
+    # Transform prices dict to expected format
+    validity_prices: dict[str, dict[str, object]] = {}
+    for (commodity_id, province, date_str), price_idr in prices.items():
+        key = f"{commodity_id}||{province}"
+        validity_prices[key] = {"price_idr": price_idr}
+    # Transform plausible_ranges to tuple format
+    plausible_ranges_tuple: dict[str, tuple[int, int]] = {
+        k: (int(v["min"]), int(v["max"])) for k, v in plausible_ranges.items()
+    }
     validity_incidents = check_validity(
-        prices={},
-        plausible_ranges={},
-        expected_units={},
+        prices=validity_prices,
+        plausible_ranges=plausible_ranges_tuple,
+        expected_units=expected_units,
         reported_units={},
     )
     result["checks"].append({"name": "validity", "passed": len(validity_incidents) == 0})
@@ -352,7 +555,7 @@ def check(
 
     # Check 4: Duplicates
     typer.echo("Running duplicates check...")
-    duplicates_incidents = check_duplicates(prices=[])
+    duplicates_incidents = check_duplicates(prices=duplicate_rows)
     result["checks"].append({"name": "duplicates", "passed": len(duplicates_incidents) == 0})
     for incident in duplicates_incidents:
         result["incidents"].append(incident.to_dict())
@@ -360,8 +563,8 @@ def check(
     # Check 5: Schema drift
     typer.echo("Running schema drift check...")
     schema_incidents = check_schema_drift(
-        snapshots=[],
-        expected_fingerprints={},
+        snapshots=snapshot_rows,
+        expected_fingerprints=expected_fingerprints,
     )
     result["checks"].append({"name": "schema_drift", "passed": len(schema_incidents) == 0})
     for incident in schema_incidents:
@@ -370,11 +573,11 @@ def check(
     # Check 6: Anomaly
     typer.echo("Running anomaly check...")
     anomaly_incidents = check_anomaly(
-        prices={},
-        historical_prices={},
+        prices=anomaly_prices,
+        historical_prices=historical_prices,
         holiday_windows=set(),
-        national_prices={},
-        neighbor_provinces={},
+        national_prices=national_prices_anomaly,
+        neighbor_provinces=neighbor_provinces,
     )
     result["checks"].append({"name": "anomaly", "passed": len(anomaly_incidents) == 0})
     for incident in anomaly_incidents:
@@ -383,31 +586,49 @@ def check(
     # Check 7: Reconciliation
     typer.echo("Running reconciliation check...")
     reconciliation_incidents = check_reconciliation(
-        province_prices={},
-        city_prices={},
-        national_prices={},
+        province_prices=province_prices_recon,
+        city_prices=city_prices_recon,
+        national_prices=national_prices_recon,
     )
     result["checks"].append({"name": "reconciliation", "passed": len(reconciliation_incidents) == 0})
     for incident in reconciliation_incidents:
         result["incidents"].append(incident.to_dict())
 
-    # Log incidents
-    for incident in result["incidents"]:
-        incident["run_id"] = "check-run"
-        store.log_event(incident)
+    # Log all incidents to SQLite store
+    from hpdq.checks.incidents import IncidentEvent
+    all_incidents = (
+        list(freshness_incidents) + list(completeness_incidents) + list(validity_incidents)
+        + list(duplicates_incidents) + list(schema_incidents) + list(anomaly_incidents)
+        + list(reconciliation_incidents)
+    )
+    for incident in all_incidents:
+        event = IncidentEvent(
+            event_id=f"evt-{incident.incident_id}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+            incident_id=incident.incident_id,
+            event_type="opened",
+            at=incident.opened_at,
+            check=incident.check,
+            severity=incident.severity,
+            scope=incident.scope,
+            status=incident.status,
+            resolution=incident.resolution,
+            false_alarm=incident.false_alarm,
+            issue_number=incident.issue_number,
+        )
+        store.log_event(event.to_dict())
 
     # Print results
     passed = sum(1 for c in result["checks"] if c["passed"])
     failed = len(result["checks"]) - passed
 
     typer.echo("\n" + "=" * 60)
-    typer.echo(f"Results for D={business_date.date().isoformat()}")
+    typer.echo(f"Results for D={business_date.isoformat()}")
     typer.echo(f"Checks: {passed}/{len(result['checks'])} passed")
     typer.echo(f"Failed: {failed}")
     typer.echo("=" * 60)
 
     for check in result["checks"]:
-        status = "✓" if check["passed"] else "✗"
+        status = "[PASS]" if check["passed"] else "[FAIL]"
         typer.echo(f"  {status} {check['name']}")
 
     if result["incidents"]:

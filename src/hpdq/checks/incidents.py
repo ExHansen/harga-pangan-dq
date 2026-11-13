@@ -68,7 +68,7 @@ class IncidentEvent:
             "check": self.check,
             "severity": self.severity,
             "scope": self.scope.to_dict(),
-            "status": self.status.value,
+            "status": self.status.value if isinstance(self.status, IncidentStatus) else self.status,
             "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None,
             "resolution": self.resolution,
             "false_alarm": self.false_alarm,
@@ -108,6 +108,19 @@ class Incident:
             false_alarm=latest.false_alarm,
             issue_number=latest.issue_number,
         )
+
+    def to_dict(self) -> dict:
+        return {
+            "incident_id": self.incident_id,
+            "check": self.check,
+            "severity": self.severity,
+            "scope": self.scope.to_dict(),
+            "status": self.status.value if isinstance(self.status, IncidentStatus) else self.status,
+            "opened_at": self.opened_at.isoformat(),
+            "resolution": self.resolution,
+            "false_alarm": self.false_alarm,
+            "issue_number": self.issue_number,
+        }
 
 
 def _incident_id(check: str, scope: IncidentScope) -> str:
