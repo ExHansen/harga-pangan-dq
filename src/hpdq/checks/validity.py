@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
-from hpdq.timeutil import now_utc
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -18,7 +17,9 @@ def _incident_id(check: str, reason: str, ts: datetime) -> str:
 
 
 def check_validity(
-    prices: dict[str, dict[str, float | str]],  # (commodity_id, province_iso_code) → {price_raw, price_idr, is_missing}
+    prices: dict[
+        str, dict[str, float | str]
+    ],  # (commodity_id, province_iso_code) → {price_raw, price_idr, is_missing}
     plausible_ranges: dict[str, tuple[int, int]],  # commodity_id → (min, max) in IDR
     expected_units: dict[str, str],  # commodity_id → expected unit (e.g., "kg")
     reported_units: dict[str, str],  # commodity_id → unit reported by source
@@ -63,7 +64,7 @@ def check_validity(
         # Check 1: Price parses to integer > 0
         if price_idr is None or not isinstance(price_idr, int) or price_idr <= 0:
             incident = Incident(
-                incident_id=_incident_id("validity", "parse_error", datetime.now(timezone.utc)),
+                incident_id=_incident_id("validity", "parse_error", datetime.now(UTC)),
                 check="validity",
                 severity="critical",
                 scope=IncidentScope(
@@ -71,7 +72,7 @@ def check_validity(
                     severity="critical",
                     scope_type="cell",
                     scope_value=f"commodity={commodity_id}, province={province_iso_code}, price_raw={price_raw}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "Price does not parse to integer > 0",
                         "price_raw": price_raw,
@@ -79,7 +80,7 @@ def check_validity(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)
@@ -90,7 +91,7 @@ def check_validity(
             min_price, max_price = plausible_ranges[commodity_id]
             if price_idr < min_price or price_idr > max_price:
                 incident = Incident(
-                    incident_id=_incident_id("validity", "out_of_range", datetime.now(timezone.utc)),
+                    incident_id=_incident_id("validity", "out_of_range", datetime.now(UTC)),
                     check="validity",
                     severity="critical",
                     scope=IncidentScope(
@@ -98,7 +99,7 @@ def check_validity(
                         severity="critical",
                         scope_type="cell",
                         scope_value=f"commodity={commodity_id}, province={province_iso_code}, price={price_idr}",
-                        business_date=datetime.now(timezone.utc).date().isoformat(),
+                        business_date=datetime.now(UTC).date().isoformat(),
                         evidence={
                             "reason": "Price outside plausible range",
                             "price_idr": price_idr,
@@ -107,7 +108,7 @@ def check_validity(
                         },
                     ),
                     status="open",
-                    opened_at=datetime.now(timezone.utc),
+                    opened_at=datetime.now(UTC),
                     resolution=None,
                 )
                 incidents.append(incident)
@@ -119,7 +120,7 @@ def check_validity(
             reported_unit = reported_units[commodity_id]
             if expected_unit != reported_unit:
                 incident = Incident(
-                    incident_id=_incident_id("validity", "unit_mismatch", datetime.now(timezone.utc)),
+                    incident_id=_incident_id("validity", "unit_mismatch", datetime.now(UTC)),
                     check="validity",
                     severity="critical",
                     scope=IncidentScope(
@@ -127,7 +128,7 @@ def check_validity(
                         severity="critical",
                         scope_type="commodity_date",
                         scope_value=f"commodity={commodity_id}, expected_unit={expected_unit}, reported_unit={reported_unit}",
-                        business_date=datetime.now(timezone.utc).date().isoformat(),
+                        business_date=datetime.now(UTC).date().isoformat(),
                         evidence={
                             "reason": "Unit mismatch between expected and reported",
                             "commodity_id": commodity_id,
@@ -136,7 +137,7 @@ def check_validity(
                         },
                     ),
                     status="open",
-                    opened_at=datetime.now(timezone.utc),
+                    opened_at=datetime.now(UTC),
                     resolution=None,
                 )
                 incidents.append(incident)

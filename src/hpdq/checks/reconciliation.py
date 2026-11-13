@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -52,7 +52,7 @@ def check_reconciliation(
         if not city_list:
             continue
 
-        commodity_id = list(city_list[0].keys())[0]  # Simplified - get commodity_id
+        commodity_id = next(iter(city_list[0].keys()))  # Simplified - get commodity_id
         prices = [c.get("price_idr") for c in city_list if c.get("price_idr") is not None]
 
         if not prices:
@@ -70,7 +70,7 @@ def check_reconciliation(
 
         if diff > expected_rounding:
             incident = Incident(
-                incident_id=_incident_id("reconciliation", "province_vs_cities", datetime.now(timezone.utc)),
+                incident_id=_incident_id("reconciliation", "province_vs_cities", datetime.now(UTC)),
                 check="reconciliation",
                 severity="critical",
                 scope=IncidentScope(
@@ -78,7 +78,7 @@ def check_reconciliation(
                     severity="critical",
                     scope_type="province_day",
                     scope_value=f"province={province_iso_code}, commodity={commodity_id}, province_price={province_price}, mean_city_price={mean_city_price}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "Province price differs from mean of cities by more than Rp 50",
                         "province_price": province_price,
@@ -89,7 +89,7 @@ def check_reconciliation(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)
@@ -100,7 +100,7 @@ def check_reconciliation(
             continue
 
         province_prices_list = []
-        for province_iso_code, price in province_prices.items():
+        for _province_iso_code, price in province_prices.items():
             if price is not None and price > 0:
                 province_prices_list.append(price)
 
@@ -113,7 +113,9 @@ def check_reconciliation(
         # Check if ratio is within reasonable band (e.g., 0.9 to 1.1)
         if ratio < 0.9 or ratio > 1.1:
             incident = Incident(
-                incident_id=_incident_id("reconciliation", "national_vs_provinces", datetime.now(timezone.utc)),
+                incident_id=_incident_id(
+                    "reconciliation", "national_vs_provinces", datetime.now(UTC)
+                ),
                 check="reconciliation",
                 severity="warning",
                 scope=IncidentScope(
@@ -121,7 +123,7 @@ def check_reconciliation(
                     severity="warning",
                     scope_type="commodity_date",
                     scope_value=f"commodity={commodity_id}, national_price={national_price}, mean_province_price={mean_province_price}, ratio={ratio}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "National price ratio to mean of provinces outside expected band",
                         "national_price": national_price,
@@ -131,7 +133,7 @@ def check_reconciliation(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)

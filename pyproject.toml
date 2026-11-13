@@ -38,6 +38,11 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PTH", "DTZ"]
+ignore = [
+    "E501",       # line too long (docstrings/f-strings are often long)
+    "RUF002",     # ambiguous unicode character in docstring
+    "RUF003",     # ambiguous unicode character in comment
+]
 
 [tool.mypy]
 python_version = "3.12"

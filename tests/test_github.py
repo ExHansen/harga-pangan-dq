@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -30,7 +29,7 @@ def test_github_issue_dataclass():
         created_at="2026-11-12T10:00:00Z",
         updated_at="2026-11-12T10:00:00Z",
     )
-    
+
     assert issue.number == 123
     assert issue.title == "Test Issue"
     assert issue.state == "open"
@@ -42,29 +41,29 @@ def test_github_issue_dataclass():
 async def test_open_issue(mock_client):
     """Test opening a GitHub issue."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 201
     mock_response.json.return_value = {"number": 456}
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     issue_number = await manager.open_issue(
         title="Test Issue",
         body="Test body",
         labels=["bug"],
     )
-    
+
     assert issue_number == 456
-    
+
     # Verify that request was called
     assert mock_client.call_count == 1
 
@@ -74,29 +73,29 @@ async def test_open_issue(mock_client):
 async def test_open_issue_with_labels(mock_client):
     """Test opening an issue with labels."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 201
     mock_response.json.return_value = {"number": 789}
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     issue_number = await manager.open_issue(
         title="Test Issue",
         body="Test body",
         labels=["bug", "priority", "data-quality"],
     )
-    
+
     assert issue_number == 789
-    
+
     # Verify that request was called
     assert mock_client.call_count == 1
 
@@ -106,22 +105,22 @@ async def test_open_issue_with_labels(mock_client):
 async def test_comment_issue(mock_client):
     """Test commenting on an issue."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 201
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     await manager.comment_issue(123, "This is a comment")
-    
+
     # Verify that request was called
     assert mock_client.call_count == 1
 
@@ -131,22 +130,22 @@ async def test_comment_issue(mock_client):
 async def test_close_issue(mock_client):
     """Test closing an issue."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 200
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     await manager.close_issue(123, "Resolved by automated check")
-    
+
     # Verify that request was called
     assert mock_client.call_count == 1
 
@@ -156,22 +155,22 @@ async def test_close_issue(mock_client):
 async def test_add_label(mock_client):
     """Test adding a label to an issue."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 200
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     await manager.add_label(123, "bug")
-    
+
     # Verify that request was called
     assert mock_client.call_count == 1
 
@@ -181,10 +180,10 @@ async def test_add_label(mock_client):
 async def test_get_issue(mock_client):
     """Test getting an issue by number."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -197,15 +196,15 @@ async def test_get_issue(mock_client):
         "created_at": "2026-11-12T10:00:00Z",
         "updated_at": "2026-11-12T10:00:00Z",
     }
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     issue = await manager.get_issue(123)
-    
+
     assert issue is not None
     assert issue.number == 123
     assert issue.state == "open"
@@ -216,22 +215,22 @@ async def test_get_issue(mock_client):
 async def test_get_issue_not_found(mock_client):
     """Test getting a non-existent issue."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 404
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     issue = await manager.get_issue(9999)
-    
+
     assert issue is None
 
 
@@ -240,10 +239,10 @@ async def test_get_issue_not_found(mock_client):
 async def test_close_all(mock_client):
     """Test closing all open issues."""
     manager = GitHubIssueManager(repo="test/repo")
-    
+
     # Configure mock client
     mock_client_instance = mock_client.return_value
-    
+
     # Create mock response (not async, just a regular mock)
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -261,18 +260,18 @@ async def test_close_all(mock_client):
             "updated_at": "2026-11-12T10:00:00Z",
         },
     ]
-    
+
     # Create a coroutine that returns the mock_response
     async def mock_request(*args, **kwargs):
         return mock_response
-    
+
     mock_client_instance.request = mock_request
-    
+
     # Mock close_issue
     manager.close_issue = AsyncMock()
-    
+
     await manager.close_all()
-    
+
     # Should have called close_issue twice
     assert manager.close_issue.call_count == 2
 

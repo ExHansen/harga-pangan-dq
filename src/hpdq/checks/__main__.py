@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -14,11 +14,11 @@ from hpdq.checks.anomaly import check_anomaly
 from hpdq.checks.completeness import check_completeness
 from hpdq.checks.duplicates import check_duplicates
 from hpdq.checks.freshness import check_freshness
+from hpdq.checks.github import GitHubIssueManager
 from hpdq.checks.incidents_store import IncidentStore
 from hpdq.checks.reconciliation import check_reconciliation
 from hpdq.checks.schema_drift import check_schema_drift
 from hpdq.checks.validity import check_validity
-from hpdq.checks.github import GitHubIssueManager
 
 
 class CheckResult:
@@ -107,8 +107,8 @@ async def run_all_checks(
     # Run each check
     # Check 1: Freshness
     incidents = check_freshness(
-        expected_publication_time=datetime.now(timezone.utc),
-        cutoff_time=datetime(17, 0, 0, tzinfo=timezone.utc),
+        expected_publication_time=datetime.now(UTC),
+        cutoff_time=datetime(17, 0, 0, tzinfo=UTC),
         latest_national_snapshot=latest_national_snapshot,
         volatile_commodities=volatile_commodities,
         latest_volatile_snapshots=latest_volatile_snapshots,
@@ -150,13 +150,15 @@ async def run_all_checks(
     # Extract price rows from prices dict
     price_rows = []
     for (commodity_id, province_iso_code), price_info in prices.items():
-        price_rows.append({
-            "snapshot_id": "test",
-            "commodity_id": commodity_id,
-            "area_key": province_iso_code,
-            "price_date": business_date,
-            "price_idr": price_info.get("price_idr"),
-        })
+        price_rows.append(
+            {
+                "snapshot_id": "test",
+                "commodity_id": commodity_id,
+                "area_key": province_iso_code,
+                "price_date": business_date,
+                "price_idr": price_info.get("price_idr"),
+            }
+        )
     incidents = check_duplicates(prices=price_rows)
     for incident in incidents:
         result.add_incident(incident)
@@ -208,6 +210,6 @@ async def run_all_checks(
         store.log_event(event)
 
     # Initialize GitHub Issue manager
-    result.github_issue_manager = await github_issue_manager()
+    result.github_issue_manager = GitHubIssueManager()
 
     return result

@@ -1,5 +1,6 @@
 """Ingestion: fetch a plan of requests politely and store every new response immutably, then run data quality checks."""
 
+import asyncio
 import json
 import logging
 from collections.abc import Callable
@@ -8,7 +9,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Literal
 
-from hpdq.checks import run_all_checks
 from hpdq.checks.incidents_store import IncidentStore
 from hpdq.pihps.client import (
     FetchFailedError,
@@ -153,10 +153,11 @@ def run_checks(
     neighbor_provinces: dict[str, list[str]],
     holiday_windows: set[str],
     build_dir: Path | None = None,
+    run_id: str = "check-run",
 ) -> tuple[list, dict]:
     """
     Run data quality checks on ingested data.
-    
+
     Returns:
         Tuple of (incidents, results_dict)
     """
@@ -170,17 +171,15 @@ def run_checks(
         check_validity,
     )
     from hpdq.checks.github import github_issue_manager
-    from hpdq.checks.incidents import Incident
-    from hpdq.checks.incidents_store import IncidentStore
-    
+
     result = {
         "business_date": business_date.isoformat(),
         "checks": [],
         "incidents": [],
     }
-    
+
     store = IncidentStore(build_dir)
-    
+
     # Check 1: Freshness
     log.info("Running freshness check...")
     freshness_incidents = check_freshness(
@@ -197,7 +196,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Freshness check critical: %s", incident.scope.scope_value)
-    
+
     # Check 2: Completeness
     log.info("Running completeness check...")
     completeness_incidents = check_completeness(
@@ -210,7 +209,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Completeness check critical: %s", incident.scope.scope_value)
-    
+
     # Check 3: Validity
     log.info("Running validity check...")
     validity_incidents = check_validity(
@@ -224,7 +223,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Validity check critical: %s", incident.scope.scope_value)
-    
+
     # Check 4: Duplicates
     log.info("Running duplicates check...")
     duplicates_incidents = check_duplicates(prices=list(prices.values()))
@@ -233,7 +232,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Duplicates check critical: %s", incident.scope.scope_value)
-    
+
     # Check 5: Schema drift
     log.info("Running schema drift check...")
     schema_incidents = check_schema_drift(
@@ -245,7 +244,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Schema drift check critical: %s", incident.scope.scope_value)
-    
+
     # Check 6: Anomaly
     log.info("Running anomaly check...")
     anomaly_incidents = check_anomaly(
@@ -260,7 +259,7 @@ def run_checks(
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Anomaly check critical: %s", incident.scope.scope_value)
-    
+
     # Check 7: Reconciliation
     log.info("Running reconciliation check...")
     reconciliation_incidents = check_reconciliation(
@@ -268,17 +267,19 @@ def run_checks(
         city_prices=city_prices,
         national_prices=national_prices,
     )
-    result["checks"].append({"name": "reconciliation", "passed": len(reconciliation_incidents) == 0})
+    result["checks"].append(
+        {"name": "reconciliation", "passed": len(reconciliation_incidents) == 0}
+    )
     for incident in reconciliation_incidents:
         result["incidents"].append(incident.to_dict())
         if incident.severity == "critical":
             log.warning("Reconciliation check critical: %s", incident.scope.scope_value)
-    
+
     # Log all incidents to store
     for incident in result["incidents"]:
         incident["run_id"] = run_id
         store.log_event(incident)
-    
+
     # Initialize GitHub Issue manager for critical incidents
     async def process_github_issues():
         github_manager = await github_issue_manager()
@@ -288,20 +289,28 @@ def run_checks(
                 issue_number = await github_manager.open_issue(
                     title=f"[{business_date.isoformat()}] {incident.get('check', 'unknown')} - {incident.get('incident_id', 'unknown')}",
                     body=_build_issue_body(incident),
-                    labels=["data-quality", "data-quality/critical", f"data-quality/{incident.get('check', 'unknown')}"],
+                    labels=[
+                        "data-quality",
+                        "data-quality/critical",
+                        f"data-quality/{incident.get('check', 'unknown')}",
+                    ],
                 )
                 incident["issue_number"] = issue_number
-                log.info("Opened GitHub Issue #%d for incident %s", issue_number, incident["incident_id"])
+                log.info(
+                    "Opened GitHub Issue #%d for incident %s", issue_number, incident["incident_id"]
+                )
             except Exception as e:
-                log.error("Failed to open GitHub Issue for incident %s: %s", incident["incident_id"], e)
-    
+                log.error(
+                    "Failed to open GitHub Issue for incident %s: %s", incident["incident_id"], e
+                )
+
     asyncio.run(process_github_issues())
-    
+
     # Print summary
     passed = sum(1 for c in result["checks"] if c["passed"])
     failed = len(result["checks"]) - passed
     log.info("Checks: %d/%d passed, %d failed", passed, len(result["checks"]), failed)
-    
+
     return result["incidents"], result
 
 
@@ -309,7 +318,7 @@ def _build_issue_body(incident: dict) -> str:
     """Build GitHub issue body from incident."""
     scope = incident.get("scope", {})
     evidence = incident.get("evidence", {})
-    
+
     lines = [
         "## Incident",
         "",

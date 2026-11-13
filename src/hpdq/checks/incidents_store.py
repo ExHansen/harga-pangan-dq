@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -62,30 +62,33 @@ class IncidentStore:
         """Log a single event to the database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR IGNORE INTO incident_events (
                 event_id, incident_id, event_type, at, check_name, severity,
                 scope_type, scope_value, business_date, status, resolved_at,
                 resolution, false_alarm, run_id, issue_number, evidence
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            event["event_id"],
-            event["incident_id"],
-            event["event_type"],
-            event["at"],
-            event["check"],
-            event["severity"],
-            event["scope"]["scope_type"],
-            event["scope"]["scope_value"],
-            event["scope"]["business_date"],
-            event["status"],
-            event.get("resolved_at"),
-            event.get("resolution"),
-            1 if event.get("false_alarm") else 0,
-            event.get("run_id"),
-            event.get("issue_number"),
-            json.dumps(event["scope"].get("evidence", {})),
-        ))
+        """,
+            (
+                event["event_id"],
+                event["incident_id"],
+                event["event_type"],
+                event["at"],
+                event["check"],
+                event["severity"],
+                event["scope"]["scope_type"],
+                event["scope"]["scope_value"],
+                event["scope"]["business_date"],
+                event["status"],
+                event.get("resolved_at"),
+                event.get("resolution"),
+                1 if event.get("false_alarm") else 0,
+                event.get("run_id"),
+                event.get("issue_number"),
+                json.dumps(event["scope"].get("evidence", {})),
+            ),
+        )
         conn.commit()
         conn.close()
 
@@ -94,11 +97,14 @@ class IncidentStore:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM incident_events
             WHERE business_date = ?
             ORDER BY at DESC
-        """, (business_date,))
+        """,
+            (business_date,),
+        )
         rows = cursor.fetchall()
         # sqlite3.Row needs to be converted with dict() not _as_dict()
         return [dict(row) for row in rows]
@@ -124,12 +130,15 @@ class IncidentStore:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM incident_events
             WHERE incident_id = ?
             ORDER BY at DESC
             LIMIT 1
-        """, (incident_id,))
+        """,
+            (incident_id,),
+        )
         row = cursor.fetchone()
         conn.close()
         if row:
@@ -141,11 +150,14 @@ class IncidentStore:
         """Mark an incident as resolved."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE incident_events
             SET status = 'resolved', resolved_at = ?, resolution = ?
             WHERE incident_id = ?
-        """, (datetime.now(timezone.utc).isoformat(), resolution, incident_id))
+        """,
+            (datetime.now(UTC).isoformat(), resolution, incident_id),
+        )
         conn.commit()
         affected = cursor.rowcount
         conn.close()
@@ -155,11 +167,14 @@ class IncidentStore:
         """Mark an incident as a false alarm."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE incident_events
             SET status = 'false_alarm_marked', false_alarm = 1
             WHERE incident_id = ?
-        """, (incident_id,))
+        """,
+            (incident_id,),
+        )
         conn.commit()
         affected = cursor.rowcount
         conn.close()
@@ -169,11 +184,14 @@ class IncidentStore:
         """Link a GitHub issue to an incident."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE incident_events
             SET issue_number = ?, status = 'issue_linked'
             WHERE incident_id = ?
-        """, (issue_number, incident_id))
+        """,
+            (issue_number, incident_id),
+        )
         conn.commit()
         affected = cursor.rowcount
         conn.close()

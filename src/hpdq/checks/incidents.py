@@ -2,10 +2,10 @@
 
 import hashlib
 import json
+import os
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from typing import Any
 
 import httpx
@@ -15,6 +15,7 @@ from hpdq.config import PROJECT_URL
 
 class IncidentStatus(Enum):
     """Incident lifecycle states."""
+
     OPEN = "open"
     RESOLVED = "resolved"
     FALSE_ALARM_MARKED = "false_alarm_marked"
@@ -24,6 +25,7 @@ class IncidentStatus(Enum):
 @dataclass
 class IncidentScope:
     """Scope of an incident (what data is affected)."""
+
     check: str
     severity: str  # "critical" or "warning"
     scope_type: str  # "cell", "commodity_day", "province_day", "commodity_date", etc.
@@ -45,6 +47,7 @@ class IncidentScope:
 @dataclass
 class IncidentEvent:
     """Single event in the incident lifecycle (append-only log)."""
+
     event_id: str
     incident_id: str
     event_type: str  # "opened", "resolved", "false_alarm_marked", "issue_linked"
@@ -83,6 +86,7 @@ class IncidentEvent:
 @dataclass
 class Incident:
     """Current state of an incident (view of the latest event)."""
+
     incident_id: str
     check: str
     severity: str
@@ -196,10 +200,9 @@ class GitHubIssueManager:
         resp.raise_for_status()
         issues = resp.json()
         for issue in issues:
-            await self.close_issue(issue["number"], f"Resolved by automated check. See: {PROJECT_URL}")
-
-
-import os
+            await self.close_issue(
+                issue["number"], f"Resolved by automated check. See: {PROJECT_URL}"
+            )
 
 
 async def github_issue_manager() -> GitHubIssueManager:
