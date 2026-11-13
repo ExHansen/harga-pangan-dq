@@ -152,7 +152,7 @@ def deploy(
         try:
             con.execute("SET TimeZone = 'UTC'")
             result = con.execute(
-                "SELECT * FROM incident_events ORDER BY created_at DESC"
+                "SELECT * FROM incident_events ORDER BY at DESC"
             ).fetchall()
             cols = [d[0] for d in con.description] if con.description else []
             incident_rows = [dict(zip(cols, row)) for row in result]
