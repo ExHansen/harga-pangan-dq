@@ -103,9 +103,9 @@
   <script>
     // Load summary stats from health and incidents data
     Promise.all([
-      fetch('data/health.json').then(r => r.json()).catch(() => null),
-      fetch('data/incidents.json').then(r => r.json()).catch(() => null),
-      fetch('data/latest_prices.json').then(r => r.json()).catch(() => null),
+      fetch('data/site/health.json').then(r => r.json()).catch(() => null),
+      fetch('data/site/incidents.json').then(r => r.json()).catch(() => null),
+      fetch('data/site/latest_prices.json').then(r => r.json()).catch(() => null),
     ]).then(function(results) {
       var health = results[0] || {};
       var incidents = results[1] || {};
