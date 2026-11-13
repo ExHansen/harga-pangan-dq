@@ -10,7 +10,7 @@ Every milestone ends with:
 
 I never push. You push `main`, and the bot pushes the `data` branch once it is live.
 
-## M1 — Skeleton, CI, and ingestion for one commodity group
+## M1 — Skeleton, CI, and ingestion for one commodity group ✅ done 2026-11-12
 
 Commodity group: **chillies**, 4 items:
 
@@ -35,10 +35,13 @@ Chillies are the most volatile group, so they exercise the anomaly logic early.
 - the parser tests pass on fixtures;
 - CI is green locally (`act` is not required; the same commands run via `uv run`).
 
-## M2 — dbt models, tests, province mapping
+## M2 — dbt models, tests, province mapping ✅ done 2026-11-12
 
 - Enable all 21 commodities (a config change).
-- Bootstrap backfill of the last ~12 months, about 21–42 requests, so baselines exist.
+- Bootstrap backfill so baselines exist.
+  - *Changed:* the plan assumed ~12 months in 21–42 requests. A one-year window timed out at the
+    source, so backfill moved to monthly windows. To stay close to the approved request budget,
+    the bootstrap covers 2026-08-01 → 2026-11-11: 84 requests, 74 business days with 2026-11-12.
 - Seeds: 38 provinces, the 34→38 map, commodities with expected unit and plausible range.
 - Staging, intermediate and marts. Contracts on marts. Custom generic tests.
 - `docs/data-dictionary.md`.
@@ -87,7 +90,9 @@ missed, and nothing is typed by hand.
 
 ## M6 — Full backfill and the analysis write-up
 
-- Backfill 2018 → today via `backfill.yml`, about 190 requests spread out.
+- Backfill 2018 → mid-2026 via `backfill.yml`, in monthly windows: about 2,160 requests (~4.8 h at
+  8 s each), split over several night-time (WIB) runs. *Revised in M2;* the earlier estimate of
+  ~190 assumed one-year windows, which the source cannot serve.
 - Calibrate anomaly thresholds on history, and report how Lebaran-window flags were classified.
 - `docs/analysis.md` answers 2 questions:
   1. Which commodity × province pairs are the most volatile, and is volatility structural

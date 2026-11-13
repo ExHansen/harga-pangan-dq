@@ -32,6 +32,7 @@ class IngestSummary:
     deduped: int = 0
     failed: int = 0
     skipped: int = 0
+    already_stored: int = 0
     http_attempts: int = 0
     stop_reason: str | None = None
     manifest_path: Path | None = None
@@ -39,7 +40,7 @@ class IngestSummary:
 
     @property
     def status(self) -> RunStatus:
-        ok = self.stored + self.deduped
+        ok = self.stored + self.deduped + self.already_stored
         if ok == self.planned:
             return "success"
         return "partial" if ok > 0 else "failed"
@@ -53,12 +54,30 @@ def run_ingest(
     store: RawStore,
     run_id: str,
     clock: Callable[[], datetime] = now_utc,
+    skip_existing: bool = False,
 ) -> IngestSummary:
+    """Fetch ``specs`` in order and store new responses.
+
+    ``skip_existing`` (used by backfill) does not request anything that already has a snapshot, so
+    an interrupted backfill resumes where it stopped without re-asking the source.
+    """
     summary = IngestSummary(run_id=run_id, business_date=business_date, planned=len(specs))
-    manifest = Manifest(run_id=run_id, started_at=clock())
+    manifest = Manifest.open(store.root, run_id=run_id, started_at=clock())
+    summary.manifest_path = manifest.path
     try:
         for i, spec in enumerate(specs):
             endpoint = spec.endpoint.value
+            if skip_existing:
+                existing = store.latest(spec)
+                if existing is not None:
+                    summary.already_stored += 1
+                    manifest.add(
+                        key=spec.key,
+                        endpoint=endpoint,
+                        outcome="exists",
+                        snapshot=existing.body_path.relative_to(store.root).as_posix(),
+                    )
+                    continue
             try:
                 result = client.fetch(spec)
             except (SourceRefusedError, RequestBudgetExceededError) as exc:
@@ -105,5 +124,4 @@ def run_ingest(
             log.info("%s: %s", spec.key, "stored" if put.created else "unchanged (dedup)")
     finally:
         summary.http_attempts = client.requests_made
-        summary.manifest_path = manifest.write(store.root)
     return summary

@@ -15,6 +15,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --locked --no-dev --no-install-project
 COPY src ./src
+COPY dbt ./dbt
 RUN uv sync --locked --no-dev
 
 ENV PATH="/app/.venv/bin:${PATH}"

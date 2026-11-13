@@ -1,0 +1,39 @@
+pihps_province_id,source_province_name,iso_code,mapping_type
+1,Aceh,ID-AC,one_to_one
+2,Sumatera Utara,ID-SU,one_to_one
+3,Sumatera Barat,ID-SB,one_to_one
+4,Riau,ID-RI,one_to_one
+5,Kepulauan Riau,ID-KR,one_to_one
+6,Jambi,ID-JA,one_to_one
+7,Bengkulu,ID-BE,one_to_one
+8,Sumatera Selatan,ID-SS,one_to_one
+9,Kepulauan Bangka Belitung,ID-BB,one_to_one
+10,Lampung,ID-LA,one_to_one
+11,Banten,ID-BT,one_to_one
+12,Jawa Barat,ID-JB,one_to_one
+13,DKI Jakarta,ID-JK,one_to_one
+14,Jawa Tengah,ID-JT,one_to_one
+15,DI Yogyakarta,ID-YO,one_to_one
+16,Jawa Timur,ID-JI,one_to_one
+17,Bali,ID-BA,one_to_one
+18,Nusa Tenggara Barat,ID-NB,one_to_one
+19,Nusa Tenggara Timur,ID-NT,one_to_one
+20,Kalimantan Barat,ID-KB,one_to_one
+21,Kalimantan Selatan,ID-KS,one_to_one
+22,Kalimantan Tengah,ID-KT,one_to_one
+23,Kalimantan Timur,ID-KI,one_to_one
+24,Kalimantan Utara,ID-KU,one_to_one
+25,Gorontalo,ID-GO,one_to_one
+26,Sulawesi Selatan,ID-SN,one_to_one
+27,Sulawesi Tenggara,ID-SG,one_to_one
+28,Sulawesi Tengah,ID-ST,one_to_one
+29,Sulawesi Utara,ID-SA,one_to_one
+30,Sulawesi Barat,ID-SR,one_to_one
+31,Maluku,ID-MA,one_to_one
+32,Maluku Utara,ID-MU,one_to_one
+33,Papua,ID-PA,split
+33,Papua,ID-PS,split
+33,Papua,ID-PT,split
+33,Papua,ID-PE,split
+34,Papua Barat,ID-PB,split
+34,Papua Barat,ID-PD,split

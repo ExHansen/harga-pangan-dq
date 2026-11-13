@@ -35,10 +35,16 @@ COMMODITY_GROUPS: dict[str, tuple[str, ...]] = {
     "all": tuple(COMMODITIES),
 }
 
-DEFAULT_GROUP = "chillies"
+DEFAULT_GROUP = "all"  # M2: all 21 commodities (M1 used "chillies")
 
 
-def commodities_for(group: str) -> tuple[str, ...]:
+def commodities_for(group: str, only: list[str] | None = None) -> tuple[str, ...]:
+    """The commodity ids of ``group``, or exactly ``only`` when given (each must be known)."""
+    if only:
+        unknown = [c for c in only if c not in COMMODITIES]
+        if unknown:
+            raise ValueError(f"unknown commodity id(s): {', '.join(unknown)}")
+        return tuple(dict.fromkeys(only))
     try:
         return COMMODITY_GROUPS[group]
     except KeyError:

@@ -83,6 +83,9 @@ PIHPS, unless you approve exploring a second source.
    - a daily run is 21 requests (traditional markets) or 84 (all four market types);
    - backfill from 2018 to today is about 8.8 years. With one request per commodity per quarter,
      that is about 750 requests, throttled and spread over several nights.
+   - *Correction (M2):* long windows are expensive for the source. A one-year window timed out
+     (> 30 s), while a month takes ~5 s. Backfill therefore uses monthly windows, about 2,160
+     requests for 2018 → mid-2026 (see design.md §2, Backfill).
 
 ## Proposed access rules for PIHPS
 

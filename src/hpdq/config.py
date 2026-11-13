@@ -21,6 +21,11 @@ REQUEST_TIMEOUT_S = 30.0
 # Each daily request covers D-7..D so late data and revisions are re-read at no extra request cost.
 DEFAULT_WINDOW_DAYS = 7
 
+# Backfill asks for heavier (one-month) windows, ~5 s of server time each: leave the source idle
+# for a few seconds between them, and retry at most once.
+BACKFILL_MIN_INTERVAL_S = 8.0
+BACKFILL_RETRY_BACKOFF_S: tuple[float, ...] = (30.0,)
+
 
 def user_agent() -> str:
     return f"harga-pangan-dq/{__version__} (+{PROJECT_URL})"

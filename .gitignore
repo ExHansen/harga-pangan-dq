@@ -13,6 +13,13 @@ dist/
 *.duckdb
 *.duckdb.wal
 
+# Private project brief (never published)
+/B-harga-pangan-dq-monitor.md
+
+# dbt artifacts (also redirected to ./build by `hpdq build`)
+dbt/target/
+dbt/logs/
+
 # Node (dashboard, from M4)
 node_modules/
 

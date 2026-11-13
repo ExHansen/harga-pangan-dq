@@ -1,0 +1,22 @@
+commodity_id,commodity_name,commodity_name_en,category_id,category_name_en,unit,unit_note,plausible_min_idr,plausible_max_idr
+com_1,Beras Kualitas Bawah I,"Rice, low quality I",cat_1,Rice,kg,,3500,72000
+com_2,Beras Kualitas Bawah II,"Rice, low quality II",cat_1,Rice,kg,,3400,70000
+com_3,Beras Kualitas Medium I,"Rice, medium quality I",cat_1,Rice,kg,,4400,76000
+com_4,Beras Kualitas Medium II,"Rice, medium quality II",cat_1,Rice,kg,,4000,77000
+com_5,Beras Kualitas Super I,"Rice, premium quality I",cat_1,Rice,kg,,4800,81000
+com_6,Beras Kualitas Super II,"Rice, premium quality II",cat_1,Rice,kg,,4300,79000
+com_7,Daging Ayam Ras Segar,"Chicken meat (broiler), fresh",cat_2,Chicken meat,kg,,8500,190000
+com_8,Daging Sapi Kualitas 1,"Beef, quality 1",cat_3,Beef,kg,,38000,600000
+com_9,Daging Sapi Kualitas 2,"Beef, quality 2",cat_3,Beef,kg,,26000,600000
+com_10,Telur Ayam Ras Segar,"Chicken eggs, fresh",cat_4,Eggs,kg,,7500,140000
+com_11,Bawang Merah Ukuran Sedang,"Shallots, medium",cat_5,Shallots,kg,,6600,240000
+com_12,Bawang Putih Ukuran Sedang,"Garlic, medium",cat_6,Garlic,kg,,8800,200000
+com_13,Cabai Merah Besar,"Red chilli, large",cat_7,Red chilli,kg,,6400,440000
+com_14,Cabai Merah Keriting,"Red chilli, curly",cat_7,Red chilli,kg,,8600,470000
+com_15,Cabai Rawit Hijau,Green bird's-eye chilli,cat_8,Bird's-eye chilli,kg,,8000,530000
+com_16,Cabai Rawit Merah,Red bird's-eye chilli,cat_8,Bird's-eye chilli,kg,,11000,560000
+com_17,Minyak Goreng Curah,"Cooking oil, bulk",cat_9,Cooking oil,kg,The source reference list says kg; the PIHPS FAQ says cooking oil is surveyed per litre. Shown as published.,5000,90000
+com_18,Minyak Goreng Kemasan Bermerk 1,"Cooking oil, branded pack 1",cat_9,Cooking oil,kg,The source reference list says kg; the PIHPS FAQ says cooking oil is surveyed per litre. Shown as published.,6300,110000
+com_19,Minyak Goreng Kemasan Bermerk 2,"Cooking oil, branded pack 2",cat_9,Cooking oil,kg,The source reference list says kg; the PIHPS FAQ says cooking oil is surveyed per litre. Shown as published.,5500,95000
+com_20,Gula Pasir Kualitas Premium,"Sugar, premium",cat_10,Sugar,kg,,5000,110000
+com_21,Gula Pasir Lokal,"Sugar, local",cat_10,Sugar,kg,,5300,90000

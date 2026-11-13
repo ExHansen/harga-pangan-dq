@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: parsed
+    description: >
+      Lossless long tables written by `hpdq load` from the immutable raw store
+      (src/hpdq/load/flatten.py). Nothing in them is cleaned or typed.
+    config:
+      meta:
+        external_location: "{{ env_var('HPDQ_PARSED_DIR', '../build/parsed') }}/{name}.parquet"
+    tables:
+      - name: snapshots
+        description: One row per stored raw snapshot, with provenance and a shape fingerprint.
+        columns:
+          - name: snapshot_id
+            data_tests: [unique, not_null]
+      - name: raw_cells
+        description: One row per (snapshot, row, field) of every snapshot whose shape is ok.

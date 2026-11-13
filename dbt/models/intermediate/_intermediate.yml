@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: int_prices__current
+    description: >
+      The source's current value for every (price type, commodity, date, area): all areas of a
+      date come from the most recently fetched snapshot containing that date.
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [price_type_id, commodity_id, price_date, area_key]
+    columns:
+      - name: is_revised
+        description: The value differed between snapshots that contained this cell.
+      - name: n_snapshots
+        description: How many snapshots contained this cell.
+
+  - name: int_prices__series
+    description: >
+      Observed prices as time series per (price type, commodity, area) with day-over-day,
+      week-over-week, log return and 20-observation volatility.
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [price_type_id, commodity_id, area_key, price_date]
+    columns:
+      - name: price_idr
+        data_tests: [not_null, positive]
+      - name: days_since_prev
+        description: Calendar days since the previous observation (3 after a weekend).
+        data_tests: [positive]
+
+unit_tests:
+  - name: latest_snapshot_wins_per_commodity_date
+    description: >
+      Snapshot B (fetched later) replaces A for every area of the dates it covers, including a
+      late province that A had as missing; a date only A covers keeps A's values.
+    model: int_prices__current
+    given:
+      - input: ref('stg_pihps__prices')
+        rows:
+          - {snapshot_id: A, fetched_at: "2026-11-12 07:20:00+00", price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-10", price_raw: "42,000", price_idr: 42000, is_missing: false, row_idx: 1}
+          - {snapshot_id: A, fetched_at: "2026-11-12 07:20:00+00", price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Bali, area_name: Bali, price_date: "2026-11-11", price_raw: "-", price_idr: null, is_missing: true, row_idx: 2}
+          - {snapshot_id: A, fetched_at: "2026-11-12 07:20:00+00", price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-11", price_raw: "42,000", price_idr: 42000, is_missing: false, row_idx: 1}
+          - {snapshot_id: B, fetched_at: "2026-11-13 07:20:00+00", price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-11", price_raw: "43,000", price_idr: 43000, is_missing: false, row_idx: 1}
+          - {snapshot_id: B, fetched_at: "2026-11-13 07:20:00+00", price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Bali, area_name: Bali, price_date: "2026-11-11", price_raw: "39,700", price_idr: 39700, is_missing: false, row_idx: 2}
+    expect:
+      rows:
+        - {snapshot_id: A, area_key: Aceh, price_date: "2026-11-10", price_idr: 42000, is_revised: false, n_snapshots: 1}
+        - {snapshot_id: B, area_key: Aceh, price_date: "2026-11-11", price_idr: 43000, is_revised: true, n_snapshots: 2}
+        - {snapshot_id: B, area_key: Bali, price_date: "2026-11-11", price_idr: 39700, is_revised: true, n_snapshots: 2}
+
+  - name: changes_skip_weekends_and_week_ago_uses_as_of
+    description: >
+      Friday -> Monday is one step (3 days); week-over-week on Monday 16 Nov compares with the
+      latest observation on or before Monday 9 Nov; a first observation has no change.
+    model: int_prices__series
+    given:
+      - input: ref('int_prices__current')
+        rows:
+          - {price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-09", price_idr: 40000, is_revised: false, snapshot_id: S}
+          - {price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-13", price_idr: 50000, is_revised: false, snapshot_id: S}
+          - {price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-16", price_idr: 25000, is_revised: false, snapshot_id: S}
+          - {price_type_id: 1, commodity_id: com_13, area_type: province, area_key: Aceh, area_name: Aceh, price_date: "2026-11-17", price_idr: null, is_revised: false, snapshot_id: S}
+    expect:
+      # ratios chosen to be exact in binary floating point (1.25, 0.5, 0.625)
+      rows:
+        - {price_date: "2026-11-09", prev_price_date: null, days_since_prev: null, dod_pct: null, week_ago_date: null, wow_pct: null}
+        - {price_date: "2026-11-13", prev_price_date: "2026-11-09", days_since_prev: 4, dod_pct: 25.0, week_ago_date: null, wow_pct: null}
+        - {price_date: "2026-11-16", prev_price_date: "2026-11-13", days_since_prev: 3, dod_pct: -50.0, week_ago_date: "2026-11-09", wow_pct: -37.5}

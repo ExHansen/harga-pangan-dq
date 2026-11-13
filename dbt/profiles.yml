@@ -1,0 +1,11 @@
+# Paths come from environment variables set by `hpdq build` (src/hpdq/transform.py), so every
+# artifact lands in the disposable ./build directory. No credentials: DuckDB is a local file.
+hpdq:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('HPDQ_WAREHOUSE', '../build/warehouse.duckdb') }}"
+      threads: 4
+      settings:
+        TimeZone: UTC

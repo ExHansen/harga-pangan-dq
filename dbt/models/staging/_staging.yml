@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: stg_pihps__snapshots
+    description: One row per raw snapshot with its request parameters unpacked.
+    columns:
+      - name: snapshot_id
+        description: File stem of the raw snapshot (request key, fetch time, sha256 prefix).
+        data_tests: [unique, not_null]
+      - name: parse_status
+        description: ok, invalid_json, unexpected_shape or missing_meta (from the loader).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [ok, invalid_json, unexpected_shape, missing_meta]
+
+  - name: stg_pihps__grid_rows
+    description: >
+      One row per (snapshot, row) of the commodity grids: national (level 0), province (1) or city
+      (2). City rows get their province from row order.
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [snapshot_id, row_idx]
+    columns:
+      - name: area_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [national, province, city]
+      - name: area_name_raw
+        description: Name exactly as published (some carry trailing spaces).
+      - name: area_name
+        description: Trimmed name.
+        data_tests: [not_null]
+      - name: parent_province_name
+        description: For city rows, the province row above it; null otherwise.
+      - name: area_key
+        description: Stable identity across snapshots ("national", province name, "Province / City").
+        data_tests: [not_null]
+
+  - name: stg_pihps__prices
+    description: >
+      One row per (snapshot, area, date) price cell. price_raw keeps the published text;
+      price_idr is set only when the text is a well-formed rupiah amount like "16,500".
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [snapshot_id, area_key, price_date]
+    columns:
+      - name: price_date
+        data_tests: [not_null]
+      - name: price_raw
+        description: Published text, e.g. "16,500" or "-" (missing).
+      - name: is_missing
+        description: True when the source published "-".
+      - name: price_idr
+        description: Integer rupiah per unit; null when missing or not a well-formed amount.
+        data_tests: [positive]
+
+  - name: stg_pihps__ref_commodities
+    description: The source's commodity reference list, one row per (snapshot, item).
+
+  - name: stg_pihps__ref_provinces
+    description: The source's province reference list, one row per (snapshot, province).

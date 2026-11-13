@@ -1,0 +1,161 @@
+version: 2
+
+seeds:
+  - name: provinces
+    description: >
+      Indonesia's 38 provinces since the 2022 Papua splits. Key: ISO 3166-2:ID code. Island group =
+      the ISO 3166-2 geographical unit (Bali is in "Nusa Tenggara"). Source: ISO 3166-2:ID;
+      legal basis of the four new provinces: UU 14, 15, 16/2022 (25 July 2022) and UU 29/2022
+      (December 2022).
+    config:
+      column_types:
+        iso_code: varchar
+        province_name: varchar
+        province_name_en: varchar
+        island_group: varchar
+        split_from_iso_code: varchar
+        legal_basis: varchar
+    columns:
+      - name: iso_code
+        description: ISO 3166-2:ID code, e.g. ID-PA.
+        data_tests: [unique, not_null]
+      - name: province_name
+        description: Indonesian name.
+        data_tests: [unique, not_null]
+      - name: province_name_en
+        description: English name (ISO 3166-2 listing).
+      - name: island_group
+        description: ISO 3166-2 geographical unit.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Sumatera, Jawa, Nusa Tenggara, Kalimantan, Sulawesi, Maluku, Papua]
+      - name: split_from_iso_code
+        description: For provinces created in 2022, the province they were split from.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('provinces')
+                field: iso_code
+      - name: legal_basis
+        description: The law that created the province (only for the 2022 provinces).
+
+  - name: pihps_province_map
+    description: >
+      How the 34 provinces PIHPS still reports map to today's 38. 32 are one-to-one. "Papua"
+      covers today's Papua, Papua Selatan, Papua Tengah and Papua Pegunungan; "Papua Barat" covers
+      Papua Barat and Papua Barat Daya. Ids and names come from the source's GetRefProvince list
+      (a singular test fails if they drift).
+    config:
+      column_types:
+        pihps_province_id: integer
+        source_province_name: varchar
+        iso_code: varchar
+        mapping_type: varchar
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [pihps_province_id, iso_code]
+    columns:
+      - name: pihps_province_id
+        description: Province id in the PIHPS reference list.
+        data_tests: [not_null]
+      - name: source_province_name
+        description: Province name exactly as PIHPS publishes it.
+        data_tests: [not_null]
+      - name: iso_code
+        description: Current province (ISO 3166-2:ID).
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('provinces')
+                field: iso_code
+      - name: mapping_type
+        description: one_to_one, or split (the source province now covers several provinces).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [one_to_one, split]
+
+  - name: pihps_split_cities
+    description: >
+      The sample cities of the two split source provinces, assigned to their current province.
+      A singular test fails if the source reports a city in a split province that is not listed
+      here, so a new city can never be assigned silently.
+    config:
+      column_types:
+        source_province_name: varchar
+        city_name: varchar
+        iso_code: varchar
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [source_province_name, city_name]
+    columns:
+      - name: source_province_name
+        description: Split source province (Papua or Papua Barat).
+      - name: city_name
+        description: Sample city as published by PIHPS.
+      - name: iso_code
+        description: Current province of the city (ISO 3166-2:ID).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('provinces')
+                field: iso_code
+
+  - name: commodities
+    description: >
+      The 21 PIHPS commodities with English names, the unit the source's reference list declares,
+      and a deliberately wide plausible price range for the validity check. Cooking oil: the
+      reference list says kg, the PIHPS FAQ says litre; shown as published, with a note. Ranges
+      were computed by analyses/plausible_price_ranges.sql ([p0.5/3, p99.5x3] of all province and
+      city prices, rounded outward to 2 significant digits) on data from 2026-08-03 to 2026-11-12;
+      they are recalibrated on the full history in M6.
+    config:
+      column_types:
+        commodity_id: varchar
+        commodity_name: varchar
+        commodity_name_en: varchar
+        category_id: varchar
+        category_name_en: varchar
+        unit: varchar
+        unit_note: varchar
+        plausible_min_idr: bigint
+        plausible_max_idr: bigint
+    data_tests:
+      - dbt_expression_is_true:
+          arguments:
+            expression: "plausible_min_idr < plausible_max_idr"
+    columns:
+      - name: plausible_min_idr
+        description: Lowest price (rupiah per unit) the validity check accepts.
+        data_tests: [not_null, positive]
+      - name: plausible_max_idr
+        description: Highest price (rupiah per unit) the validity check accepts.
+        data_tests: [not_null, positive]
+      - name: commodity_id
+        description: PIHPS id, e.g. com_13.
+        data_tests: [unique, not_null]
+      - name: commodity_name
+        description: Indonesian name as in the source reference list.
+      - name: commodity_name_en
+        description: English name.
+      - name: category_id
+        description: PIHPS category id (cat_1 rice ... cat_10 sugar).
+      - name: category_name_en
+        description: English category name.
+      - name: unit_note
+        description: Known caveat about the unit, if any.
+      - name: unit
+        description: Unit declared by the source reference list (the contract the unit check guards).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [kg]

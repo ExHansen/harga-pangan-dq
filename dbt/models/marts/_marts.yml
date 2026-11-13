@@ -1,0 +1,346 @@
+version: 2
+
+# Every mart has an enforced contract: dbt refuses to build it if a column's name or type changes,
+# so the dashboard and analysis can rely on the shape. Prices are BIGINT rupiah per unit.
+# Every column has a description (tests/test_docs.py fails otherwise); docs/data-dictionary.md is
+# generated from this file by `hpdq docs`.
+
+models:
+  - name: fct_price_daily
+    description: >
+      Daily price per commodity x source province (traditional markets, as published by PIHPS),
+      with day-over-day and week-over-week change, volatility, and the gap to the source's own
+      national figure. Only observed prices: a missing report is a missing row, never a guess.
+    config:
+      contract: {enforced: true}
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [price_date, commodity_id, source_province_name]
+    columns:
+      - name: price_date
+        data_type: date
+        description: Business date the price refers to (WIB).
+        constraints: [{type: not_null}]
+      - name: commodity_id
+        data_type: varchar
+        description: PIHPS commodity id (see dim_commodity).
+        constraints: [{type: not_null}]
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_commodity'), field: commodity_id}
+      - name: source_province_id
+        data_type: integer
+        description: PIHPS province id (one of the 34 pre-2022 provinces).
+        constraints: [{type: not_null}]
+      - name: source_province_name
+        data_type: varchar
+        description: Province name as published (see dim_source_province for today's provinces).
+        constraints: [{type: not_null}]
+      - name: price_idr
+        data_type: bigint
+        description: Average retail price, integer rupiah per unit.
+        constraints: [{type: not_null}]
+        data_tests: [positive]
+      - name: national_price_idr
+        data_type: bigint
+        description: The source's national figure for the same commodity and day.
+      - name: gap_to_national_pct
+        data_type: double
+        description: Percent difference from the national figure (+10 = 10% above).
+      - name: prev_price_date
+        data_type: date
+        description: Date of the previous observation in this series.
+      - name: prev_price_idr
+        data_type: bigint
+        description: Previous observed price.
+      - name: days_since_prev
+        data_type: bigint
+        description: Calendar days since the previous observation (3 after a weekend).
+      - name: dod_pct
+        data_type: double
+        description: Percent change vs the previous observation ("day-over-day" in business days).
+      - name: week_ago_date
+        data_type: date
+        description: Latest observation on or before D-7 (null if older than 14 days).
+      - name: wow_pct
+        data_type: double
+        description: Percent change vs week_ago_date.
+      - name: log_return
+        data_type: double
+        description: ln(price / previous price).
+      - name: volatility_20
+        data_type: double
+        description: Sample std. dev. of the last 20 log returns (null until 20 exist).
+      - name: is_revised
+        data_type: boolean
+        description: The source changed this value between fetches.
+      - name: snapshot_id
+        data_type: varchar
+        description: Raw snapshot the value comes from (lineage back to the raw file).
+        constraints: [{type: not_null}]
+
+  - name: fct_price_national_daily
+    description: The source's national figure ("Semua Provinsi") per commodity and day.
+    config:
+      contract: {enforced: true}
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [price_date, commodity_id]
+    columns:
+      - name: price_date
+        data_type: date
+        description: Business date the price refers to (WIB).
+        constraints: [{type: not_null}]
+      - name: commodity_id
+        data_type: varchar
+        description: PIHPS commodity id (see dim_commodity).
+        constraints: [{type: not_null}]
+      - name: price_idr
+        data_type: bigint
+        description: National average retail price, integer rupiah per unit (as published).
+        constraints: [{type: not_null}]
+        data_tests: [positive]
+      - name: prev_price_date
+        data_type: date
+        description: Date of the previous observation.
+      - name: days_since_prev
+        data_type: bigint
+        description: Calendar days since the previous observation.
+      - name: dod_pct
+        data_type: double
+        description: Percent change vs the previous observation.
+      - name: week_ago_date
+        data_type: date
+        description: Latest observation on or before D-7 (null if older than 14 days).
+      - name: wow_pct
+        data_type: double
+        description: Percent change vs week_ago_date.
+      - name: volatility_20
+        data_type: double
+        description: Sample std. dev. of the last 20 log returns (null until 20 exist).
+      - name: provinces_reporting
+        data_type: bigint
+        description: Source provinces with an observed price for this commodity and day.
+        constraints: [{type: not_null}]
+      - name: is_revised
+        data_type: boolean
+        description: The source changed this value between fetches.
+      - name: snapshot_id
+        data_type: varchar
+        description: Raw snapshot the value comes from.
+        constraints: [{type: not_null}]
+
+  - name: fct_price_city_daily
+    description: >
+      Daily price per commodity x sample city, each city assigned to its current (38-province)
+      province. Basis for a true 38-province view (ADR-006).
+    config:
+      contract: {enforced: true}
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [price_date, commodity_id, source_province_name, city_name]
+    columns:
+      - name: price_date
+        data_type: date
+        description: Business date the price refers to (WIB).
+        constraints: [{type: not_null}]
+      - name: commodity_id
+        data_type: varchar
+        description: PIHPS commodity id (see dim_commodity).
+        constraints: [{type: not_null}]
+      - name: source_province_name
+        data_type: varchar
+        description: The source province the city is reported under (34-province list).
+        constraints: [{type: not_null}]
+      - name: city_name
+        data_type: varchar
+        description: Sample city (kota) or regency (kabupaten) as published, trimmed.
+        constraints: [{type: not_null}]
+      - name: province_iso_code
+        data_type: varchar
+        description: Current province (ISO 3166-2:ID) the city belongs to today.
+        constraints: [{type: not_null}]
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_province'), field: iso_code}
+      - name: price_idr
+        data_type: bigint
+        description: Average retail price in this city's surveyed markets, rupiah per unit.
+        constraints: [{type: not_null}]
+        data_tests: [positive]
+      - name: prev_price_date
+        data_type: date
+        description: Date of the previous observation for this city.
+      - name: days_since_prev
+        data_type: bigint
+        description: Calendar days since the previous observation.
+      - name: dod_pct
+        data_type: double
+        description: Percent change vs the previous observation.
+      - name: wow_pct
+        data_type: double
+        description: Percent change vs the latest observation on or before D-7.
+      - name: is_revised
+        data_type: boolean
+        description: The source changed this value between fetches.
+      - name: snapshot_id
+        data_type: varchar
+        description: Raw snapshot the value comes from.
+        constraints: [{type: not_null}]
+
+  - name: agg_volatility
+    description: >
+      Volatility per commodity x province (and national) over each series' last 60 observations.
+    config:
+      contract: {enforced: true}
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [commodity_id, area_type, area_name]
+    columns:
+      - name: commodity_id
+        data_type: varchar
+        description: PIHPS commodity id (see dim_commodity).
+        constraints: [{type: not_null}]
+      - name: area_type
+        data_type: varchar
+        description: national or province.
+        constraints: [{type: not_null}]
+      - name: area_name
+        data_type: varchar
+        description: Source province name, or "Semua Provinsi" for the national series.
+        constraints: [{type: not_null}]
+      - name: as_of_date
+        data_type: date
+        description: Last observation in the window.
+      - name: window_start_date
+        data_type: date
+        description: First observation in the window.
+      - name: n_returns
+        data_type: bigint
+        description: Log returns in the window (up to 59).
+      - name: volatility_60
+        data_type: double
+        description: Sample std. dev. of daily log returns in the window.
+      - name: mean_abs_dod_pct
+        data_type: double
+        description: Mean absolute day-over-day change, percent.
+      - name: max_abs_dod_pct
+        data_type: double
+        description: Largest absolute day-over-day change, percent.
+
+  - name: dim_commodity
+    description: >
+      The 21 commodities: our names and expected unit next to the source's current reference list
+      (name, denomination), so a rename or unit change is visible.
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: commodity_id
+        data_type: varchar
+        description: PIHPS commodity id, e.g. com_13.
+        constraints: [{type: not_null}]
+        data_tests: [unique]
+      - name: commodity_name
+        data_type: varchar
+        description: Indonesian name as in the source.
+      - name: commodity_name_en
+        data_type: varchar
+        description: English name.
+      - name: category_id
+        data_type: varchar
+        description: PIHPS category id, e.g. cat_7 (red chilli).
+      - name: category_name_en
+        data_type: varchar
+        description: English category name.
+      - name: unit
+        data_type: varchar
+        description: Unit the source's reference list declares (our contract with it).
+      - name: unit_note
+        data_type: varchar
+        description: Known caveats about the unit (cooking oil kg vs litre).
+      - name: plausible_min_idr
+        data_type: bigint
+        description: Lowest price the validity check accepts (seed; see its derivation).
+      - name: plausible_max_idr
+        data_type: bigint
+        description: Highest price the validity check accepts.
+      - name: source_name
+        data_type: varchar
+        description: Name in the source's latest reference list.
+      - name: source_denomination
+        data_type: varchar
+        description: Unit in the source's latest reference list.
+      - name: source_checked_at
+        data_type: timestamp with time zone
+        description: When that reference list was fetched (UTC).
+
+  - name: dim_province
+    description: Indonesia's 38 provinces and the source province that reports for each.
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: iso_code
+        data_type: varchar
+        description: ISO 3166-2:ID code, e.g. ID-PA.
+        constraints: [{type: not_null}]
+        data_tests: [unique]
+      - name: province_name
+        data_type: varchar
+        description: Indonesian name.
+      - name: province_name_en
+        data_type: varchar
+        description: English name.
+      - name: island_group
+        data_type: varchar
+        description: ISO 3166-2 geographical unit (Sumatera, Jawa, Nusa Tenggara, ...).
+      - name: split_from_iso_code
+        data_type: varchar
+        description: For the four 2022 provinces, the province they were split from.
+      - name: legal_basis
+        data_type: varchar
+        description: The law that created the province (2022 provinces only).
+      - name: source_province_id
+        data_type: integer
+        description: PIHPS province whose data covers this province.
+        constraints: [{type: not_null}]
+      - name: source_province_name
+        data_type: varchar
+        description: Name of that PIHPS province.
+      - name: mapping_type
+        data_type: varchar
+        description: one_to_one, or split (the source province also covers other provinces).
+
+  - name: dim_source_province
+    description: The 34 provinces PIHPS reports and the current provinces each covers.
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: source_province_id
+        data_type: integer
+        description: PIHPS province id.
+        constraints: [{type: not_null}]
+        data_tests: [unique]
+      - name: source_province_name
+        data_type: varchar
+        description: Province name as published by PIHPS.
+        constraints: [{type: not_null}]
+        data_tests: [unique]
+      - name: mapping_type
+        data_type: varchar
+        description: one_to_one, or split.
+      - name: current_province_count
+        data_type: bigint
+        description: 1, or 4 for Papua and 2 for Papua Barat.
+      - name: current_provinces
+        data_type: varchar
+        description: Today's provinces covered, comma-separated.
+      - name: current_iso_codes
+        data_type: varchar
+        description: Their ISO 3166-2:ID codes, comma-separated.
+      - name: island_group
+        data_type: varchar
+        description: ISO 3166-2 geographical unit.

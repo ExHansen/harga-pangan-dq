@@ -1,0 +1,30 @@
+name: hpdq
+version: "0.1.0"
+config-version: 2
+profile: hpdq
+require-dbt-version: [">=1.12.0", "<1.13.0"]
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+
+flags:
+  send_anonymous_usage_stats: false
+
+models:
+  hpdq:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+
+seeds:
+  hpdq:
+    +quote_columns: false
+    # Always drop and recreate: dbt-duckdb loads seeds with COPY into the existing table, so a
+    # new seed column would otherwise fail against an old warehouse (ADR-003: rebuild, never patch).
+    +full_refresh: true

@@ -109,29 +109,68 @@ state/runs/…, state/incident_events/…, state/quarantine/…   (from M3/M4, s
 
 ### Backfill
 
-`hpdq backfill --start 2018-01-01 --end 2026-11-11` runs via `workflow_dispatch`, so the bot pushes
-the data, not me. Windows are as long as the endpoint accepts (a year if allowed), so the whole
-history is about 21 × 9 ≈ 190 requests. The command is resumable: it skips windows whose snapshot
-already exists. It uses the same politeness rules, and runs are spread over nights if needed.
+*Revised in M2 after measuring.* The estimate above of ~190 requests (one per year per commodity)
+was wrong. A one-year window **timed out** (> 30 s) on three attempts before I stopped it, while
+the measured server times on 2026-11-12 were:
+
+- 8 days: ~3 s;
+- 31 days: ~5 s;
+- the 83 monthly requests of the M2 bootstrap: median 4.1 s, max 6.6 s.
+
+So backfill works in **calendar-month windows**:
+
+- `hpdq backfill --start … --end …` sends one request per commodity per month.
+- It is gentler than daily ingestion: ≥ 8 s between request starts (the source idles ~3 s between
+  queries), and at most one retry after 30 s.
+- It is resumable: a window whose snapshot already exists is not requested again (shown in M2:
+  "already stored 1").
+
+Volume:
+
+- **M2 bootstrap:** 2026-08-01 → 2026-11-11, 84 requests (83 new), all 200 OK, no retries.
+- **Full history** (M6): Jan 2018 → Jul 2026 is about 103 months × 21 ≈ **2,160 requests**, about
+  4.8 h at 8 s each. It runs as several night-time (WIB) `workflow_dispatch` runs of a few hundred
+  requests each, so the bot pushes the data, not me.
 
 ## 3. Modelling (dbt-duckdb)
 
-Python parses raw into a **lossless long table**, one row per (snapshot, row, date key, value
-string). It does **no type conversion**: a bad value should be visible to the validity check, not
-crash the parser. Unknown keys go into an `extra_keys` column for the schema-drift check.
+Python parses raw into a **lossless long table** (`raw_cells`), one row per (snapshot, row, field)
+with the value as JSON text. It does **no type conversion**: a bad value should be visible to the
+validity check, not crash the parser. Unknown fields stay in `raw_cells` and in the snapshot
+fingerprint for the schema-drift check.
+
+*As built in M2* (descriptions, types and grain: [data-dictionary.md](data-dictionary.md),
+generated):
 
 | Layer | Models |
 |---|---|
-| seeds | `provinces` (38 current provinces: BPS code, ISO 3166-2, island group, law and valid_from)<br>`pihps_province_map` (34 source names → 38, `one_to_one` / `one_to_many`, notes)<br>`commodities` (id, Indonesian and English names, group, expected unit, plausible range, volatility class)<br>`calendar_holidays` (national holidays + *cuti bersama*, with source)<br>`seasonal_windows` (Ramadan, Idul Fitri, Idul Adha, Christmas–New Year per year) |
-| staging | `stg_pihps__prices`: date parsing (dd/mm/yyyy), `"16,500"` → 16500, `"-"` → null + `is_missing`, level/area/commodity<br>`stg_pihps__ref_commodities`, `stg_pihps__ref_provinces` |
-| intermediate | `int_prices__deduped` (latest snapshot wins, revision count)<br>`int_prices__province_daily` (joined to the province map)<br>`int_prices__returns` (previous observation, business-day gap, log return) |
-| marts (contracts enforced) | `fct_price_daily`: date × commodity × province, price (BIGINT rupiah/unit), national price, day-over-day %, week-over-week %, gap to national %, is_revised<br>`fct_price_national_daily`<br>`fct_volatility`: rolling 20/60 business-day standard deviation of log returns<br>`dim_commodity`, `dim_province_source` (34) with its mapping to `dim_province` (38) |
+| seeds | `provinces`: 38 provinces, ISO 3166-2 code, English name, ISO geographical unit as island group, `split_from`, law.<br>`pihps_province_map`: 34 source provinces → 38, `one_to_one` / `split`.<br>`pihps_split_cities`: the 7 cities of the split provinces → current province.<br>`commodities`: names, unit, plausible range derived from data. |
+| staging (views) | `stg_pihps__snapshots`: request params.<br>`stg_pihps__grid_rows`: area type; a city's parent province comes from row order; `area_key`.<br>`stg_pihps__prices`: `"16,500"` → 16500, `"-"` → `is_missing`, raw text kept.<br>`stg_pihps__ref_commodities`, `stg_pihps__ref_provinces`. |
+| intermediate | `int_prices__current`: latest snapshot per (commodity, date), revision flags (ADR-015).<br>`int_prices__series`: one model for national, province and city series. It computes previous observation, day-over-day %, week-over-week % (ASOF, ≤ 14 days), log return and `volatility_20`. |
+| marts (contracts enforced) | `fct_price_daily`: date × commodity × source province, with the gap to national.<br>`fct_price_national_daily`: with `provinces_reporting`.<br>`fct_price_city_daily`: each city in its current province, for a true 38-province view.<br>`agg_volatility`: last 60 observations per series.<br>`dim_commodity`, `dim_province` (38), `dim_source_province` (34). |
 
-- The marts exclude quarantined scopes.
-- dbt tests use custom generic tests (unique combination, positive, accepted range, relationships),
-  with **no dbt packages**.
+- `calendar_holidays` and `seasonal_windows` moved to M3, where the checks that use them are built.
+- *M3 note:* the marts will exclude quarantined scopes.
+- **Tests:**
+  - custom generic tests (`unique_combination`, `positive`, `dbt_expression_is_true`), with
+    **no dbt packages**;
+  - 4 singular tests that guard the reference data against the source's own lists;
+  - 2 **dbt unit tests** on synthetic rows: latest-snapshot-wins, and weekend/ASOF changes;
+  - an enforced contract on every mart, shown to fail on a type change (`price_idr` declared
+    `integer` → "data type mismatch").
 - **Two different jobs:** dbt tests answer "is my transformation correct?". The DQ checks answer
   "can I trust the source today?".
+
+*Facts measured on the M2 data* (21 commodities, 74 business days, 2026-08-03 → 2026-11-12):
+
+- **Province = mean of its reporting cities, rounded to Rp 50:** 50,979 of 50,979 province values
+  hold, with no exceptions. This is check #7a in M3.
+- **Revisions:** 0 of 50,979 province values changed between overlapping fetches. It is still
+  tracked (`is_revised`).
+- **Names:** 123 published names carried trailing spaces. Staging trims them and keeps
+  `area_name_raw`.
+- **Coverage:** all 34 source provinces appear; the split-province cities are exactly the 7 in the
+  seed.
 
 ## 4. Data-quality checks
 
@@ -338,6 +377,44 @@ boundary decision and a GeoJSON licence check.
 - Why: the stored bytes hash to the same SHA-256 as the response itself, so anyone can verify a file
   without our code.
 
+**ADR-014 (M2) Stay on dbt Core 1.12 + dbt-duckdb, not dbt v2.**
+
+- Context: dbt now ships a "v2". It is a Rust rewrite with a new PyPI name (`dbt`) and its own
+  licence. Its DuckDB support is CLI-only, and local unit tests are experimental. The docs say v1.x
+  "remains fully supported".
+- Decided: dbt-core 1.12.7 + dbt-duckdb 1.11.1, pinned exactly. This was approved in the design.
+- Why:
+  - in-process `dbtRunner` (no subprocess);
+  - mature external Parquet sources;
+  - unit tests and contracts work today;
+  - Apache-2.0.
+- Revisit when v2's DuckDB adapter leaves CLI-only.
+
+**ADR-015 (M2) Latest snapshot per (commodity, date), not per cell.**
+
+- Decided: for each (price type, commodity, date), all areas come from the most recently fetched
+  snapshot that contains that date.
+- Alternative: latest value per cell. That mixes publications, and a value the source later removes
+  would survive forever.
+- Why: the marts show exactly one publication of the source per date. Revisions stay visible
+  (`is_revised`, `n_snapshots`). Proven by a dbt unit test.
+
+**ADR-016 (M2) dbt runs in-process and leaves no state behind.**
+
+- Seeds are `full_refresh: true`. dbt-duckdb loads seeds with `COPY` into the existing table, so a
+  new seed column failed against an older warehouse; this was seen in M2 and fixed this way.
+- After every invocation, `run_dbt` closes dbt-duckdb's cached DuckDB environment. Otherwise the
+  next connection in the same process (the checks in M3, the tests) is refused with "different
+  configuration than existing connections".
+- All dbt output (warehouse, `target/`, logs) goes under `./build`.
+
+**ADR-017 (M2) The data dictionary is generated.**
+
+- `hpdq docs` renders [data-dictionary.md](data-dictionary.md) from the dbt manifest: descriptions,
+  types, and grain (taken from `unique_combination` tests).
+- Tests fail if a mart or seed column has no description, if a seed column is undeclared, or if the
+  committed file is stale.
+
 ## 9. Dependencies (approval requested)
 
 | Purpose | Package | Pin (latest checked 2026-11-12) |
@@ -345,7 +422,7 @@ boundary decision and a GeoJSON licence check.
 | CLI | typer | 0.29.x |
 | HTTP | httpx | 0.28.1 (its `MockTransport` replaces a mocking library) |
 | Warehouse / Parquet | duckdb | 1.5.x (dbt-duckdb's own tested pin; 2.0.0 came out on 2026-10-21, so I'll try it in M2) |
-| Modelling | dbt-core, dbt-duckdb | 1.12.x / 1.11.1 (exact versions locked in `uv.lock` once tests pass) |
+| Modelling | dbt-core, dbt-duckdb | **1.12.7 / 1.11.1**, pinned exactly in `pyproject.toml` (M2) |
 | Dev | pytest, ruff, mypy | 9.2 / 0.17 / 2.4 |
 | Dashboard (M4) | Evidence (npm template) | 40.x |
 | Analysis charts (M6, optional group) | matplotlib | 3.11 |

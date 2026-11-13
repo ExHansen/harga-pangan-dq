@@ -3,10 +3,12 @@ from datetime import date
 from pathlib import Path
 
 import httpx
+import pytest
 
 from hpdq.ingest import IngestSummary, run_ingest
+from hpdq.pihps.client import FetchResult
 from hpdq.pihps.specs import plan_daily
-from hpdq.raw.store import RawStore
+from hpdq.raw.store import PutResult, RawStore
 from support import CHILLIES, FakeTime, MockPihps
 
 D = date(2026, 11, 11)
@@ -72,6 +74,30 @@ def test_a_failed_request_does_not_stop_the_others(tmp_path: Path, fake_time: Fa
     assert summary.status == "partial"
     assert (summary.stored, summary.failed, summary.skipped) == (5, 1, 0)
     assert manifest_outcomes(summary).count("failed") == 1
+
+
+def test_manifest_keeps_finished_requests_when_the_run_crashes(
+    tmp_path: Path, mock_pihps: MockPihps, fake_time: FakeTime
+) -> None:
+    class CrashingStore(RawStore):
+        def put(self, result: FetchResult, *, run_id: str) -> PutResult:
+            if result.spec.key.startswith("com_13"):
+                raise OSError("disk full")
+            return super().put(result, run_id=run_id)
+
+    with mock_pihps.client(fake_time) as client, pytest.raises(OSError, match="disk full"):
+        run_ingest(
+            SPECS,
+            business_date=D,
+            client=client,
+            store=CrashingStore(tmp_path),
+            run_id="crash",
+            clock=fake_time.clock,
+        )
+
+    (manifest,) = (tmp_path / "manifest").glob("*__crash.jsonl")
+    lines = [json.loads(x) for x in manifest.read_text(encoding="utf-8").splitlines()]
+    assert [x["key"] for x in lines] == ["commodities", "provinces"]  # written before the crash
 
 
 def test_everything_failing_is_a_failed_run(tmp_path: Path, fake_time: FakeTime) -> None:

@@ -92,6 +92,40 @@ def daily_window(business_date: date, window_days: int) -> tuple[date, date]:
     return business_date - timedelta(days=window_days), business_date
 
 
+def month_windows(start: date, end: date) -> list[tuple[date, date]]:
+    """Split ``[start, end]`` (inclusive) at calendar-month boundaries.
+
+    Why months: the source's response time grows with the window (8 days ~3 s, 31 days ~5 s,
+    one year > 30 s and timed out, measured 2026-11-12), so backfill asks for one month at a time.
+    Month-aligned windows also give stable, readable request keys, which makes backfill resumable.
+    """
+    if end < start:
+        raise ValueError(f"end {end} is before start {start}")
+    windows = []
+    cursor = start
+    while cursor <= end:
+        next_month = (cursor.replace(day=1) + timedelta(days=32)).replace(day=1)
+        window_end = min(next_month - timedelta(days=1), end)
+        windows.append((cursor, window_end))
+        cursor = window_end + timedelta(days=1)
+    return windows
+
+
+def plan_backfill(
+    start: date,
+    end: date,
+    comcat_ids: tuple[str, ...],
+    *,
+    show_kota: bool = True,
+) -> list[RequestSpec]:
+    """One grid request per commodity per month. No reference lists: they describe today only."""
+    return [
+        commodity_grid(c, w_start, w_end, show_kota=show_kota)
+        for w_start, w_end in month_windows(start, end)
+        for c in comcat_ids
+    ]
+
+
 def plan_daily(
     business_date: date,
     comcat_ids: tuple[str, ...],
