@@ -79,8 +79,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B data origin/data 2>/dev/null || git checkout -b data
-          git add data/site/
-          git add data/*.jsonl 2>/dev/null || true
+          git add -f data/site/
+          git add -f data/*.jsonl 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
