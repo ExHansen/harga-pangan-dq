@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -18,11 +18,17 @@ def _incident_id(check: str, reason: str, ts: datetime) -> str:
 
 
 def check_anomaly(
-    prices: dict[str, dict[str, float]],  # (commodity_id, province_iso_code) → {price_idr, price_date}
-    historical_prices: dict[str, list[float]],  # (commodity_id, province_iso_code) → list of historical prices
+    prices: dict[
+        str, dict[str, float]
+    ],  # (commodity_id, province_iso_code) → {price_idr, price_date}
+    historical_prices: dict[
+        str, list[float]
+    ],  # (commodity_id, province_iso_code) → list of historical prices
     holiday_windows: set[str],  # Set of date strings that are in seasonal windows
     national_prices: dict[str, float],  # commodity_id → national price today
-    neighbor_provinces: dict[str, list[str]],  # province_iso_code → list of neighboring province ISO codes
+    neighbor_provinces: dict[
+        str, list[str]
+    ],  # province_iso_code → list of neighboring province ISO codes
 ) -> list[Incident]:
     """
     Check for anomalous price movements.
@@ -105,7 +111,7 @@ def check_anomaly(
 
         if classification == "likely_error":
             incident = Incident(
-                incident_id=_incident_id("anomaly", classification, datetime.now(timezone.utc)),
+                incident_id=_incident_id("anomaly", classification, datetime.now(UTC)),
                 check="anomaly",
                 severity="critical",
                 scope=IncidentScope(
@@ -113,22 +119,22 @@ def check_anomaly(
                     severity="critical",
                     scope_type="cell",
                     scope_value=f"commodity={commodity_id}, province={province_iso_code}, price={current_price}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
-                        "reason": f"Anomalous price movement - likely data error",
+                        "reason": "Anomalous price movement - likely data error",
                         "log_return": log_return,
                         "robust_z": robust_z,
                         "classification": classification,
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)
         elif classification == "unexplained":
             incident = Incident(
-                incident_id=_incident_id("anomaly", classification, datetime.now(timezone.utc)),
+                incident_id=_incident_id("anomaly", classification, datetime.now(UTC)),
                 check="anomaly",
                 severity="warning",
                 scope=IncidentScope(
@@ -136,7 +142,7 @@ def check_anomaly(
                     severity="warning",
                     scope_type="cell",
                     scope_value=f"commodity={commodity_id}, province={province_iso_code}, price={current_price}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "Anomalous price movement - unexplained",
                         "log_return": log_return,
@@ -145,7 +151,7 @@ def check_anomaly(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)
@@ -163,8 +169,8 @@ def compute_robust_z(historical_prices: list[float], current_log_return: float) 
     # Calculate previous log returns
     prev_log_returns = []
     for i in range(1, len(historical_prices)):
-        if historical_prices[i] > 0 and historical_prices[i-1] > 0:
-            lr = math.log(historical_prices[i] / historical_prices[i-1])
+        if historical_prices[i] > 0 and historical_prices[i - 1] > 0:
+            lr = math.log(historical_prices[i] / historical_prices[i - 1])
             prev_log_returns.append(lr)
 
     if not prev_log_returns:
@@ -173,12 +179,20 @@ def compute_robust_z(historical_prices: list[float], current_log_return: float) 
     # Compute median and MAD
     sorted_returns = sorted(prev_log_returns)
     n = len(sorted_returns)
-    median = sorted_returns[n // 2] if n % 2 == 1 else (sorted_returns[n // 2 - 1] + sorted_returns[n // 2]) / 2
+    median = (
+        sorted_returns[n // 2]
+        if n % 2 == 1
+        else (sorted_returns[n // 2 - 1] + sorted_returns[n // 2]) / 2
+    )
 
     # Compute MAD
     deviations = [abs(x - median) for x in sorted_returns]
     sorted_deviations = sorted(deviations)
-    mad = sorted_deviations[n // 2] if n % 2 == 1 else (sorted_deviations[n // 2 - 1] + sorted_deviations[n // 2]) / 2
+    mad = (
+        sorted_deviations[n // 2]
+        if n % 2 == 1
+        else (sorted_deviations[n // 2 - 1] + sorted_deviations[n // 2]) / 2
+    )
 
     # Floor MAD to avoid division by zero
     mad = max(mad, 0.001)
@@ -204,7 +218,7 @@ def classify_anomaly(
     Classify an anomalous move as likely_error, likely_real, or unexplained.
     """
     # Check decimal signature (×10 or ×1000)
-    ratio = current_price / prev_price
+    current_price / prev_price
     decimal_sig = False
     for k in [3, 3.32, 1, 1.33]:  # log10(1000), log10(100), log10(10), log10(e)
         if abs(log_return - k) < 0.1:
@@ -213,10 +227,12 @@ def classify_anomaly(
 
     # Check if isolated (neighbours and national flat)
     neighbor_changes = []
-    for neighbor in neighbor_provinces:
+    for _neighbor in neighbor_provinces:
         # Simplified - in real impl would need neighbor prices
         neighbor_changes.append(0.0)
-    median_neighbor_change = sum(neighbor_changes) / len(neighbor_changes) if neighbor_changes else 0.0
+    median_neighbor_change = (
+        sum(neighbor_changes) / len(neighbor_changes) if neighbor_changes else 0.0
+    )
 
     national_change = 0.0
     if national_price_today > 0 and prev_price > 0:
@@ -225,13 +241,9 @@ def classify_anomaly(
     is_isolated = abs(median_neighbor_change) < 0.05 and abs(national_change) < 0.05
 
     # Classification logic
-    if decimal_sig:
+    if decimal_sig or (is_isolated and not in_seasonal_window and abs(robust_z) > 3):
         return "likely_error"
-    elif is_isolated and not in_seasonal_window and abs(robust_z) > 3:
-        return "likely_error"
-    elif abs(median_neighbor_change) > 0.05 or abs(national_change) > 0.05:
-        return "likely_real"
-    elif in_seasonal_window:
+    elif abs(median_neighbor_change) > 0.05 or abs(national_change) > 0.05 or in_seasonal_window:
         return "likely_real"
     else:
         return "unexplained"

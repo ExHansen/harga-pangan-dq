@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
-import pytest
+from datetime import UTC, datetime
+from unittest.mock import patch
 
 from hpdq.checks.anomaly import check_anomaly, classify_anomaly
 from hpdq.checks.completeness import check_completeness
 from hpdq.checks.duplicates import check_duplicates
-from hpdq.checks.freshness import check_freshness, _calculate_stale_threshold
-from hpdq.checks.incidents import Incident
+from hpdq.checks.freshness import _calculate_stale_threshold, check_freshness
 from hpdq.checks.reconciliation import check_reconciliation
 from hpdq.checks.schema_drift import check_schema_drift
 from hpdq.checks.validity import check_validity
@@ -18,28 +16,30 @@ from hpdq.checks.validity import check_validity
 
 def test_freshness_missing_national():
     """Test freshness check detects missing national row."""
-    incidents = check_freshness(
-        expected_publication_time=datetime(2026, 11, 13, 14, 0, 0, tzinfo=timezone.utc),
-        cutoff_time=datetime(2026, 11, 13, 17, 0, 0, tzinfo=timezone.utc),
-        latest_national_snapshot=None,
-        volatile_commodities=[],
-        latest_volatile_snapshots={},
-        previous_prices={},
-        current_volatile_prices={},
-    )
-    assert len(incidents) == 1
-    assert incidents[0].severity == "warning"  # Before 17:00
-    assert incidents[0].check == "freshness"
+    with patch("hpdq.checks.freshness.datetime") as mock_datetime:
+        mock_datetime.now.return_value = datetime(2026, 11, 13, 15, 0, 0, tzinfo=UTC)
+        incidents = check_freshness(
+            expected_publication_time=datetime(2026, 11, 13, 14, 0, 0, tzinfo=UTC),
+            cutoff_time=datetime(2026, 11, 13, 17, 0, 0, tzinfo=UTC),
+            latest_national_snapshot=None,
+            volatile_commodities=[],
+            latest_volatile_snapshots={},
+            previous_prices={},
+            current_volatile_prices={},
+        )
+        assert len(incidents) == 1
+        assert incidents[0].severity == "warning"  # Before 17:00
+        assert incidents[0].check == "freshness"
 
 
 def test_freshness_missing_national_critical():
     """Test freshness check is critical after 17:00."""
     # Patch datetime to after 17:00
     with patch("hpdq.checks.freshness.datetime") as mock_datetime:
-        mock_datetime.now.return_value = datetime(2026, 11, 13, 18, 0, 0, tzinfo=timezone.utc)
+        mock_datetime.now.return_value = datetime(2026, 11, 13, 18, 0, 0, tzinfo=UTC)
         incidents = check_freshness(
-            expected_publication_time=datetime(2026, 11, 13, 14, 0, 0, tzinfo=timezone.utc),
-            cutoff_time=datetime(2026, 11, 13, 17, 0, 0, tzinfo=timezone.utc),
+            expected_publication_time=datetime(2026, 11, 13, 14, 0, 0, tzinfo=UTC),
+            cutoff_time=datetime(2026, 11, 13, 17, 0, 0, tzinfo=UTC),
             latest_national_snapshot=None,
             volatile_commodities=[],
             latest_volatile_snapshots={},
@@ -237,7 +237,7 @@ def test_reconciliation_province_vs_cities():
     # Mean of cities = (9500 + 10500) / 2 = 10000, rounded to 10000
     # Province price = 10000, difference = 0
     # This test should NOT detect an issue because they match
-    
+
     # Let's create a real mismatch
     province_prices = {"ID-JK": 10000}
     city_prices = {
@@ -255,7 +255,7 @@ def test_reconciliation_province_vs_cities():
     # Mean of cities = (9000 + 11000) / 2 = 10000, rounded to 10000
     # Province price = 10000, difference = 0
     # Still no issue
-    
+
     # Create actual mismatch
     province_prices = {"ID-JK": 9500}
     city_prices = {
@@ -296,9 +296,7 @@ def test_reconciliation_within_tolerance():
 
 def test_anomaly_likely_error():
     """Test anomaly check classifies likely error."""
-    prices = {
-        ("commodity1", "ID-JK"): {"price_idr": 10000, "price_date": "2026-11-12"}
-    }
+    prices = {("commodity1", "ID-JK"): {"price_idr": 10000, "price_date": "2026-11-12"}}
     historical_prices = {
         ("commodity1", "ID-JK"): [10000, 10000, 10000, 10000, 10000],
         ("commodity1", "ID-JT"): [10000, 10000, 10000, 10000, 10000],
@@ -367,7 +365,3 @@ def test_stale_threshold_partial_change():
         volatile_commodities, previous_prices, current_volatile_prices
     )
     assert threshold == 0.5  # 2 out of 4 unchanged
-
-
-# Mock for testing
-from unittest.mock import patch

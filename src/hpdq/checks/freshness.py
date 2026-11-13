@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
-from hpdq.timeutil import now_utc
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -52,20 +51,21 @@ def check_freshness(
 
     # Check 1: Missing national row for today
     if latest_national_snapshot is None:
+        is_after_cutoff = datetime.now(UTC) >= cutoff_time
         incident = Incident(
-            incident_id=_incident_id("freshness", "missing_national", datetime.now(timezone.utc)),
+            incident_id=_incident_id("freshness", "missing_national", datetime.now(UTC)),
             check="freshness",
-            severity="critical" if datetime.now(timezone.utc).hour >= 17 else "warning",
+            severity="critical" if is_after_cutoff else "warning",
             scope=IncidentScope(
                 check="freshness",
-                severity="critical" if datetime.now(timezone.utc).hour >= 17 else "warning",
+                severity="critical" if is_after_cutoff else "warning",
                 scope_type="commodity_date",
-                scope_value=f"national,{datetime.now(timezone.utc).date().isoformat()}",
-                business_date=datetime.now(timezone.utc).date().isoformat(),
+                scope_value=f"national,{datetime.now(UTC).date().isoformat()}",
+                business_date=datetime.now(UTC).date().isoformat(),
                 evidence={"reason": "No national row found for today"},
             ),
             status="open",
-            opened_at=datetime.now(timezone.utc),
+            opened_at=datetime.now(UTC),
             resolution=None,
         )
         incidents.append(incident)
@@ -74,25 +74,27 @@ def check_freshness(
     # Check 2: Stale re-delivery detection for volatile commodities
     # This is a simplified version - full implementation would need historical thresholds
     if volatile_commodities and latest_volatile_snapshots:
-        stale_threshold = _calculate_stale_threshold(volatile_commodities, previous_prices, current_volatile_prices)
+        stale_threshold = _calculate_stale_threshold(
+            volatile_commodities, previous_prices, current_volatile_prices
+        )
         if stale_threshold is not None and stale_threshold > 0.995:
             incident = Incident(
-                incident_id=_incident_id("freshness", "stale_re_delivery", datetime.now(timezone.utc)),
+                incident_id=_incident_id("freshness", "stale_re_delivery", datetime.now(UTC)),
                 check="freshness",
                 severity="critical",
                 scope=IncidentScope(
                     check="freshness",
                     severity="critical",
                     scope_type="commodity_date",
-                    scope_value=f"volatile_commodities",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    scope_value="volatile_commodities",
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "High share of unchanged prices for volatile commodities",
                         "stale_share": stale_threshold,
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)

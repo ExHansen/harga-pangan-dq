@@ -9,7 +9,6 @@ import csv
 import json
 import logging
 import os
-import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ def _sql(sql: str, warehouse_path: Path) -> list[dict]:
         con.execute("SET TimeZone = 'UTC'")
         result = con.execute(sql).fetchall()
         cols = [d[0] for d in con.description] if con.description else []
-        return [dict(zip(cols, row)) for row in result]
+        return [dict(zip(cols, row, strict=False)) for row in result]
     finally:
         con.close()
 
@@ -41,7 +40,9 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
         path.write_text("", encoding="utf-8")
         return
     with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=rows[0].keys(), lineterminator="\n", extrasaction="ignore")
+        writer = csv.DictWriter(
+            f, fieldnames=rows[0].keys(), lineterminator="\n", extrasaction="ignore"
+        )
         writer.writeheader()
         writer.writerows(rows)
     logger.info("wrote %s (%d rows)", path, len(rows))
@@ -151,11 +152,9 @@ def deploy(
         con = ddb.connect(str(incidents_path))
         try:
             con.execute("SET TimeZone = 'UTC'")
-            result = con.execute(
-                'SELECT * FROM incident_events ORDER BY "at" DESC'
-            ).fetchall()
+            result = con.execute('SELECT * FROM incident_events ORDER BY "at" DESC').fetchall()
             cols = [d[0] for d in con.description] if con.description else []
-            incident_rows = [dict(zip(cols, row)) for row in result]
+            incident_rows = [dict(zip(cols, row, strict=False)) for row in result]
         finally:
             con.close()
     else:

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -55,7 +55,7 @@ def check_schema_drift(
         if expected_fp is None:
             # Unknown request key - might be new endpoint
             incident = Incident(
-                incident_id=_incident_id("schema_drift", "unknown_endpoint", datetime.now(timezone.utc)),
+                incident_id=_incident_id("schema_drift", "unknown_endpoint", datetime.now(UTC)),
                 check="schema_drift",
                 severity="critical",
                 scope=IncidentScope(
@@ -63,7 +63,7 @@ def check_schema_drift(
                     severity="critical",
                     scope_type="snapshot",
                     scope_value=f"snapshot_id={snapshot_id}, request_key={request_key}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "Unknown request key - possible new endpoint",
                         "snapshot_id": snapshot_id,
@@ -71,7 +71,7 @@ def check_schema_drift(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)
@@ -79,7 +79,7 @@ def check_schema_drift(
 
         if fingerprint != expected_fp:
             incident = Incident(
-                incident_id=_incident_id("schema_drift", "mismatch", datetime.now(timezone.utc)),
+                incident_id=_incident_id("schema_drift", "mismatch", datetime.now(UTC)),
                 check="schema_drift",
                 severity="critical",
                 scope=IncidentScope(
@@ -87,7 +87,7 @@ def check_schema_drift(
                     severity="critical",
                     scope_type="snapshot",
                     scope_value=f"snapshot_id={snapshot_id}, request_key={request_key}",
-                    business_date=datetime.now(timezone.utc).date().isoformat(),
+                    business_date=datetime.now(UTC).date().isoformat(),
                     evidence={
                         "reason": "Response fingerprint does not match expected",
                         "snapshot_id": snapshot_id,
@@ -97,7 +97,7 @@ def check_schema_drift(
                     },
                 ),
                 status="open",
-                opened_at=datetime.now(timezone.utc),
+                opened_at=datetime.now(UTC),
                 resolution=None,
             )
             incidents.append(incident)

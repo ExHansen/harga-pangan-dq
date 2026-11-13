@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from hpdq.checks.incidents import Incident, IncidentEvent, IncidentScope
+from hpdq.checks.incidents import Incident, IncidentScope
 
 if TYPE_CHECKING:
     pass
@@ -17,7 +17,9 @@ def _incident_id(check: str, reason: str, ts: datetime) -> str:
 
 
 def check_duplicates(
-    prices: list[dict],  # List of price rows with snapshot_id, commodity_id, area_key, price_date, price_idr
+    prices: list[
+        dict
+    ],  # List of price rows with snapshot_id, commodity_id, area_key, price_date, price_idr
 ) -> list[Incident]:
     """
     Check for duplicate price entries.
@@ -59,7 +61,7 @@ def check_duplicates(
             if len(unique_prices) == 1:
                 # Identical duplicates - warning
                 incident = Incident(
-                    incident_id=_incident_id("duplicates", "identical", datetime.now(timezone.utc)),
+                    incident_id=_incident_id("duplicates", "identical", datetime.now(UTC)),
                     check="duplicates",
                     severity="warning",
                     scope=IncidentScope(
@@ -75,14 +77,14 @@ def check_duplicates(
                         },
                     ),
                     status="open",
-                    opened_at=datetime.now(timezone.utc),
+                    opened_at=datetime.now(UTC),
                     resolution=None,
                 )
                 incidents.append(incident)
             elif len(unique_prices) > 1:
                 # Conflicting duplicates - critical
                 incident = Incident(
-                    incident_id=_incident_id("duplicates", "conflicting", datetime.now(timezone.utc)),
+                    incident_id=_incident_id("duplicates", "conflicting", datetime.now(UTC)),
                     check="duplicates",
                     severity="critical",
                     scope=IncidentScope(
@@ -98,7 +100,7 @@ def check_duplicates(
                         },
                     ),
                     status="open",
-                    opened_at=datetime.now(timezone.utc),
+                    opened_at=datetime.now(UTC),
                     resolution=None,
                 )
                 incidents.append(incident)
