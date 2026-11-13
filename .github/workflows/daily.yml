@@ -73,7 +73,7 @@ jobs:
       - name: Deploy site data
         run: uv run hpdq deploy
 
-      # --- Commit and push data branch ---
+      # --- Commit and push data branch (data + static HTML) ---
       - name: Push to data branch
         run: |
           git config user.name "github-actions[bot]"
@@ -81,6 +81,10 @@ jobs:
           git checkout -B data origin/data 2>/dev/null || git checkout -b data
           git add -f data/site/
           git add -f data/*.jsonl 2>/dev/null || true
+          # Copy static HTML pages to data branch root
+          cp -r docs/*.html . 2>/dev/null || true
+          cp -r docs/_includes . 2>/dev/null || true
+          git add -f *.html _includes/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
