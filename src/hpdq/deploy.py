@@ -58,7 +58,7 @@ def deploy(
     latest_prices_sql = """
         SELECT
             c.commodity_name,
-            d.area_name AS source_province_name,
+            p.source_province_name,
             p.price_date,
             p.price_idr,
             p.dod_pct,
@@ -66,9 +66,8 @@ def deploy(
             p.gap_to_national_pct
         FROM fct_price_daily p
         JOIN dim_commodity c ON p.commodity_id = c.commodity_id
-        JOIN dim_province d ON p.source_province_id = d.iso_code
         WHERE p.price_date = (SELECT MAX(price_date) FROM fct_price_daily)
-        ORDER BY c.commodity_name, d.area_name
+        ORDER BY c.commodity_name, p.source_province_name
     """
     latest_rows = _sql(latest_prices_sql, warehouse_path)
     as_of = latest_rows[0]["price_date"].isoformat() if latest_rows else None
@@ -105,12 +104,11 @@ def deploy(
         )
         SELECT
             c.commodity_name,
-            d.area_name AS source_province_name,
+            p.source_province_name,
             p.price_date,
             p.gap_to_national_pct
         FROM fct_price_daily p
         JOIN dim_commodity c ON p.commodity_id = c.commodity_id
-        JOIN dim_province d ON p.source_province_id = d.iso_code
         JOIN latest l ON p.price_date = l.max_date
         ORDER BY ABS(p.gap_to_national_pct) DESC
         LIMIT 500
