@@ -81,8 +81,8 @@
     </div>
     <div class="card">
       <h3>File Data</h3>
-      <p><a href="data/volatility.csv" download>Volatilitas CSV</a> · <a href="data/volatility.json" download>Volatilitas JSON</a></p>
-      <p><a href="data/gap_to_national.csv" download>Gap CSV</a> · <a href="data/gap_to_national.json" download>Gap JSON</a></p>
+      <p><a href="data/site/volatility.csv" download>Volatilitas CSV</a> · <a href="data/site/volatility.json" download>Volatilitas JSON</a></p>
+      <p><a href="data/site/gap_to_national.csv" download>Gap CSV</a> · <a href="data/site/gap_to_national.json" download>Gap JSON</a></p>
     </div>
   </div>
   <footer class="site-footer">
@@ -103,12 +103,12 @@
         document.getElementById(containerId).innerHTML = '<tr><td colspan="6" style="text-align:center;">Gagal memuat data.</td></tr>';
       });
     }
-    loadJSON('data/volatility.json', 'vol-table', function(rows) {
+    loadJSON('data/site/volatility.json', 'vol-table', function(rows) {
       return rows.map(function(r) {
         return '<tr><td>' + (r.commodity_name || '—') + '</td><td>' + r.area_name + '</td><td>' + (r.volatility_60 != null ? r.volatility_60.toFixed(4) : '—') + '</td><td>' + (r.mean_abs_dod_pct != null ? (r.mean_abs_dod_pct * 100).toFixed(2) + '%' : '—') + '</td><td>' + (r.max_abs_dod_pct != null ? (r.max_abs_dod_pct * 100).toFixed(2) + '%' : '—') + '</td><td>' + (r.n_returns !== undefined ? r.n_returns : '—') + '</td></tr>';
       }).join('');
     });
-    loadJSON('data/gap_to_national.json', 'gap-table', function(rows) {
+    loadJSON('data/site/gap_to_national.json', 'gap-table', function(rows) {
       return rows.slice(0, 100).map(function(r) {
         return '<tr><td>' + (r.commodity_name || '—') + '</td><td>' + r.source_province_name + '</td><td>' + (r.gap_to_national_pct != null ? r.gap_to_national_pct.toFixed(1) + '%' : '—') + '</td><td>' + (r.price_date || '—') + '</td></tr>';
       }).join('');
