@@ -644,13 +644,13 @@
     },
     {
       "commodity_name": "Bawang Merah Ukuran Sedang",
-      "source_province_name": "Lampung",
+      "source_province_name": "Jawa Timur",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -18.7910643889619
     },
     {
       "commodity_name": "Bawang Merah Ukuran Sedang",
-      "source_province_name": "Jawa Timur",
+      "source_province_name": "Lampung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -18.7910643889619
     },
@@ -1046,6 +1046,12 @@
     },
     {
       "commodity_name": "Bawang Putih Ukuran Sedang",
+      "source_province_name": "Jambi",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": -13.896103896103895
+    },
+    {
+      "commodity_name": "Bawang Putih Ukuran Sedang",
       "source_province_name": "Sumatera Barat",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -13.896103896103895
@@ -1053,12 +1059,6 @@
     {
       "commodity_name": "Bawang Putih Ukuran Sedang",
       "source_province_name": "Riau",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": -13.896103896103895
-    },
-    {
-      "commodity_name": "Bawang Putih Ukuran Sedang",
-      "source_province_name": "Jambi",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -13.896103896103895
     },
@@ -1280,15 +1280,15 @@
     },
     {
       "commodity_name": "Telur Ayam Ras Segar",
-      "source_province_name": "Gorontalo",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": 11.683848797250862
-    },
-    {
-      "commodity_name": "Telur Ayam Ras Segar",
       "source_province_name": "Lampung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -11.683848797250862
+    },
+    {
+      "commodity_name": "Telur Ayam Ras Segar",
+      "source_province_name": "Gorontalo",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": 11.683848797250862
     },
     {
       "commodity_name": "Beras Kualitas Super I",
@@ -1298,25 +1298,25 @@
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
-      "source_province_name": "Riau",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": -11.566265060240966
-    },
-    {
-      "commodity_name": "Gula Pasir Kualitas Premium",
       "source_province_name": "Maluku",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 11.566265060240966
     },
     {
+      "commodity_name": "Gula Pasir Kualitas Premium",
+      "source_province_name": "Riau",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": -11.566265060240966
+    },
+    {
       "commodity_name": "Bawang Merah Ukuran Sedang",
-      "source_province_name": "Kalimantan Utara",
+      "source_province_name": "Gorontalo",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 11.43232588699079
     },
     {
       "commodity_name": "Bawang Merah Ukuran Sedang",
-      "source_province_name": "Gorontalo",
+      "source_province_name": "Kalimantan Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 11.43232588699079
     },
@@ -1490,12 +1490,6 @@
     },
     {
       "commodity_name": "Beras Kualitas Bawah I",
-      "source_province_name": "Sumatera Barat",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": 10.6312292358804
-    },
-    {
-      "commodity_name": "Beras Kualitas Bawah I",
       "source_province_name": "Sulawesi Selatan",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -10.6312292358804
@@ -1505,6 +1499,12 @@
       "source_province_name": "Sumatera Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -10.6312292358804
+    },
+    {
+      "commodity_name": "Beras Kualitas Bawah I",
+      "source_province_name": "Sumatera Barat",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": 10.6312292358804
     },
     {
       "commodity_name": "Cabai Merah Besar",
@@ -1652,15 +1652,15 @@
     },
     {
       "commodity_name": "Beras Kualitas Super I",
-      "source_province_name": "Kalimantan Selatan",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": 9.141274238227147
-    },
-    {
-      "commodity_name": "Beras Kualitas Super I",
       "source_province_name": "Aceh",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -9.141274238227147
+    },
+    {
+      "commodity_name": "Beras Kualitas Super I",
+      "source_province_name": "Kalimantan Selatan",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": 9.141274238227147
     },
     {
       "commodity_name": "Bawang Merah Ukuran Sedang",
@@ -1838,13 +1838,13 @@
     },
     {
       "commodity_name": "Daging Sapi Kualitas 2",
-      "source_province_name": "Kalimantan Tengah",
+      "source_province_name": "Papua",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 8.052759458521352
     },
     {
       "commodity_name": "Daging Sapi Kualitas 2",
-      "source_province_name": "Papua",
+      "source_province_name": "Kalimantan Tengah",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 8.052759458521352
     },
@@ -1964,13 +1964,13 @@
     },
     {
       "commodity_name": "Daging Sapi Kualitas 2",
-      "source_province_name": "Sumatera Utara",
+      "source_province_name": "Kalimantan Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -7.150295036445675
     },
     {
       "commodity_name": "Daging Sapi Kualitas 2",
-      "source_province_name": "Kalimantan Utara",
+      "source_province_name": "Sumatera Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -7.150295036445675
     },
@@ -1981,14 +1981,14 @@
       "gap_to_national_pct": 7.14285714285714
     },
     {
-      "commodity_name": "Bawang Putih Ukuran Sedang",
-      "source_province_name": "Maluku",
+      "commodity_name": "Beras Kualitas Super II",
+      "source_province_name": "Maluku Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 7.14285714285714
     },
     {
-      "commodity_name": "Beras Kualitas Super II",
-      "source_province_name": "Maluku Utara",
+      "commodity_name": "Bawang Putih Ukuran Sedang",
+      "source_province_name": "Maluku",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 7.14285714285714
     },
@@ -2072,13 +2072,13 @@
     },
     {
       "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
-      "source_province_name": "Sumatera Utara",
+      "source_province_name": "Riau",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -6.748466257668717
     },
     {
       "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
-      "source_province_name": "Riau",
+      "source_province_name": "Sumatera Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -6.748466257668717
     },
@@ -2210,13 +2210,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Medium I",
-      "source_province_name": "Aceh",
+      "source_province_name": "Bali",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.970149253731338
     },
     {
       "commodity_name": "Beras Kualitas Medium I",
-      "source_province_name": "Bali",
+      "source_province_name": "Aceh",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.970149253731338
     },
@@ -2306,13 +2306,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Super II",
-      "source_province_name": "Jawa Tengah",
+      "source_province_name": "Bali",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.428571428571427
     },
     {
       "commodity_name": "Beras Kualitas Super II",
-      "source_province_name": "Bali",
+      "source_province_name": "Jawa Tengah",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.428571428571427
     },
@@ -2354,13 +2354,13 @@
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
-      "source_province_name": "Lampung",
+      "source_province_name": "Kepulauan Bangka Belitung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.301204819277105
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
-      "source_province_name": "Kepulauan Bangka Belitung",
+      "source_province_name": "Lampung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.301204819277105
     },
@@ -2408,12 +2408,6 @@
     },
     {
       "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
-      "source_province_name": "Sulawesi Utara",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": -5.112474437627812
-    },
-    {
-      "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
       "source_province_name": "DKI Jakarta",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.112474437627812
@@ -2421,6 +2415,12 @@
     {
       "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
       "source_province_name": "Bali",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": -5.112474437627812
+    },
+    {
+      "commodity_name": "Minyak Goreng Kemasan Bermerk 1",
+      "source_province_name": "Sulawesi Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -5.112474437627812
     },
@@ -2474,15 +2474,15 @@
     },
     {
       "commodity_name": "Gula Pasir Lokal",
-      "source_province_name": "Bali",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": -4.834605597964381
-    },
-    {
-      "commodity_name": "Gula Pasir Lokal",
       "source_province_name": "Sulawesi Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.834605597964381
+    },
+    {
+      "commodity_name": "Gula Pasir Lokal",
+      "source_province_name": "Bali",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": -4.834605597964381
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
@@ -2510,13 +2510,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Bawah II",
-      "source_province_name": "Jawa Barat",
+      "source_province_name": "Sumatera Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -4.7138047138047146
     },
     {
       "commodity_name": "Beras Kualitas Bawah II",
-      "source_province_name": "Sumatera Utara",
+      "source_province_name": "Jawa Barat",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -4.7138047138047146
     },
@@ -2534,13 +2534,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Bawah I",
-      "source_province_name": "Bengkulu",
+      "source_province_name": "Maluku",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.651162790697683
     },
     {
       "commodity_name": "Beras Kualitas Bawah I",
-      "source_province_name": "Maluku",
+      "source_province_name": "Bengkulu",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.651162790697683
     },
@@ -2630,18 +2630,6 @@
     },
     {
       "commodity_name": "Daging Sapi Kualitas 1",
-      "source_province_name": "Kepulauan Bangka Belitung",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": 4.336485164656012
-    },
-    {
-      "commodity_name": "Daging Sapi Kualitas 1",
-      "source_province_name": "Sumatera Barat",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": 4.336485164656012
-    },
-    {
-      "commodity_name": "Daging Sapi Kualitas 1",
       "source_province_name": "Bengkulu",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.336485164656012
@@ -2653,14 +2641,26 @@
       "gap_to_national_pct": 4.336485164656012
     },
     {
+      "commodity_name": "Daging Sapi Kualitas 1",
+      "source_province_name": "Kepulauan Bangka Belitung",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": 4.336485164656012
+    },
+    {
+      "commodity_name": "Daging Sapi Kualitas 1",
+      "source_province_name": "Sumatera Barat",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": 4.336485164656012
+    },
+    {
       "commodity_name": "Gula Pasir Lokal",
-      "source_province_name": "Sulawesi Tengah",
+      "source_province_name": "Papua Barat",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.325699745547085
     },
     {
       "commodity_name": "Gula Pasir Lokal",
-      "source_province_name": "Papua Barat",
+      "source_province_name": "Sulawesi Tengah",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 4.325699745547085
     },
@@ -2671,26 +2671,26 @@
       "gap_to_national_pct": 4.285714285714293
     },
     {
-      "commodity_name": "Bawang Putih Ukuran Sedang",
-      "source_province_name": "Jawa Tengah",
-      "price_date": "2026-11-13",
-      "gap_to_national_pct": -4.285714285714281
-    },
-    {
       "commodity_name": "Beras Kualitas Super II",
       "source_province_name": "Lampung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -4.285714285714281
     },
     {
+      "commodity_name": "Bawang Putih Ukuran Sedang",
+      "source_province_name": "Jawa Tengah",
+      "price_date": "2026-11-13",
+      "gap_to_national_pct": -4.285714285714281
+    },
+    {
       "commodity_name": "Beras Kualitas Medium II",
-      "source_province_name": "Banten",
+      "source_province_name": "Kepulauan Bangka Belitung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -4.229607250755285
     },
     {
       "commodity_name": "Beras Kualitas Medium II",
-      "source_province_name": "Kepulauan Bangka Belitung",
+      "source_province_name": "Banten",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -4.229607250755285
     },
@@ -2768,13 +2768,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Bawah I",
-      "source_province_name": "Jawa Timur",
+      "source_province_name": "Sumatera Selatan",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.9867109634551534
     },
     {
       "commodity_name": "Beras Kualitas Bawah I",
-      "source_province_name": "Sumatera Selatan",
+      "source_province_name": "Jawa Timur",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.9867109634551534
     },
@@ -2816,7 +2816,7 @@
     },
     {
       "commodity_name": "Beras Kualitas Medium I",
-      "source_province_name": "Kalimantan Timur",
+      "source_province_name": "Jambi",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 3.88059701492538
     },
@@ -2828,7 +2828,7 @@
     },
     {
       "commodity_name": "Beras Kualitas Medium I",
-      "source_province_name": "Jambi",
+      "source_province_name": "Kalimantan Timur",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 3.88059701492538
     },
@@ -2876,13 +2876,13 @@
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
-      "source_province_name": "Banten",
+      "source_province_name": "Sumatera Barat",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.6144578313253017
     },
     {
       "commodity_name": "Gula Pasir Kualitas Premium",
-      "source_province_name": "Sumatera Barat",
+      "source_province_name": "Banten",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.6144578313253017
     },
@@ -2942,13 +2942,13 @@
     },
     {
       "commodity_name": "Beras Kualitas Medium II",
-      "source_province_name": "Kalimantan Barat",
+      "source_province_name": "Sulawesi Utara",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 3.3232628398791597
     },
     {
       "commodity_name": "Beras Kualitas Medium II",
-      "source_province_name": "Sulawesi Utara",
+      "source_province_name": "Kalimantan Barat",
       "price_date": "2026-11-13",
       "gap_to_national_pct": 3.3232628398791597
     },
@@ -2966,7 +2966,7 @@
     },
     {
       "commodity_name": "Gula Pasir Lokal",
-      "source_province_name": "DI Yogyakarta",
+      "source_province_name": "Lampung",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.30788804071247
     },
@@ -2978,7 +2978,7 @@
     },
     {
       "commodity_name": "Gula Pasir Lokal",
-      "source_province_name": "Lampung",
+      "source_province_name": "DI Yogyakarta",
       "price_date": "2026-11-13",
       "gap_to_national_pct": -3.30788804071247
     },

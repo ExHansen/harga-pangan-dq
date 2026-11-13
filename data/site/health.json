@@ -1,4 +1,40 @@
 {
-  "date": "2026-11-13",
-  "checks": []
+  "date": "2026-11-14",
+  "checks": [
+    {
+      "name": "freshness",
+      "passed": true,
+      "details": "0 insiden"
+    },
+    {
+      "name": "completeness",
+      "passed": false,
+      "details": "0 insiden"
+    },
+    {
+      "name": "validity",
+      "passed": false,
+      "details": "0 insiden"
+    },
+    {
+      "name": "duplicates",
+      "passed": true,
+      "details": "0 insiden"
+    },
+    {
+      "name": "schema_drift",
+      "passed": false,
+      "details": "0 insiden"
+    },
+    {
+      "name": "anomaly",
+      "passed": true,
+      "details": "0 insiden"
+    },
+    {
+      "name": "reconciliation",
+      "passed": false,
+      "details": "0 insiden"
+    }
+  ]
 }

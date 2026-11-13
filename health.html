@@ -77,7 +77,7 @@
     </div>
     <div class="card">
       <h3>File Data</h3>
-      <p><a href="data/health.json" download>Health JSON</a> · <a href="data/health.csv" download>Health CSV</a></p>
+      <p><a href="data/site/health.json" download>Health JSON</a> · <a href="data/site/health.csv" download>Health CSV</a></p>
     </div>
   </div>
   <footer class="site-footer">
@@ -98,7 +98,7 @@
         document.getElementById(containerId).innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat data.</td></tr>';
       });
     }
-    loadJSON('data/health.json', 'health-table', function(data) {
+    loadJSON('data/site/health.json', 'health-table', function(data) {
       document.getElementById('health-date').textContent = data.date || '—';
       var checks = data.checks || [];
       if (checks.length === 0) {
@@ -110,7 +110,7 @@
         return '<tr><td><strong>' + c.name + '</strong></td><td><span class="badge ' + cls + '">' + label + '</span></td><td>' + (c.details || '—') + '</td></tr>';
       }).join('');
     });
-    loadJSON('data/contracts.json', 'contract-table', function(data) {
+    loadJSON('data/site/contracts.json', 'contract-table', function(data) {
       var contracts = data.contracts || [];
       if (contracts.length === 0) {
         return '<tr><td colspan="3" style="text-align:center;">Belum ada data kontrak.</td></tr>';

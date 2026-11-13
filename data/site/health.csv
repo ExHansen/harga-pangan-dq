@@ -1,0 +1,8 @@
+name,passed,details
+freshness,True,0 insiden
+completeness,False,0 insiden
+validity,False,0 insiden
+duplicates,True,0 insiden
+schema_drift,False,0 insiden
+anomaly,True,0 insiden
+reconciliation,False,0 insiden

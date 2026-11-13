@@ -106,8 +106,8 @@ Cabai Rawit Hijau,Maluku,2026-11-13,19.521912350597614
 Telur Ayam Ras Segar,Jawa Timur,2026-11-13,-19.415807560137456
 Beras Kualitas Super I,DKI Jakarta,2026-11-13,19.11357340720221
 Cabai Rawit Merah,DKI Jakarta,2026-11-13,-19.0599173553719
-Bawang Merah Ukuran Sedang,Lampung,2026-11-13,-18.7910643889619
 Bawang Merah Ukuran Sedang,Jawa Timur,2026-11-13,-18.7910643889619
+Bawang Merah Ukuran Sedang,Lampung,2026-11-13,-18.7910643889619
 Minyak Goreng Kemasan Bermerk 2,Kepulauan Bangka Belitung,2026-11-13,-18.77637130801688
 Bawang Putih Ukuran Sedang,Sulawesi Tenggara,2026-11-13,18.571428571428573
 Beras Kualitas Bawah I,Papua,2026-11-13,18.272425249169434
@@ -173,9 +173,9 @@ Beras Kualitas Super II,Maluku,2026-11-13,13.99999999999999
 Beras Kualitas Bawah I,Papua Barat,2026-11-13,-13.953488372093027
 Bawang Merah Ukuran Sedang,Sumatera Selatan,2026-11-13,-13.929040735873855
 Telur Ayam Ras Segar,DKI Jakarta,2026-11-13,-13.917525773195871
+Bawang Putih Ukuran Sedang,Jambi,2026-11-13,-13.896103896103895
 Bawang Putih Ukuran Sedang,Sumatera Barat,2026-11-13,-13.896103896103895
 Bawang Putih Ukuran Sedang,Riau,2026-11-13,-13.896103896103895
-Bawang Putih Ukuran Sedang,Jambi,2026-11-13,-13.896103896103895
 Beras Kualitas Super I,Sulawesi Barat,2026-11-13,-13.850415512465375
 Beras Kualitas Bawah I,Nusa Tenggara Timur,2026-11-13,-13.621262458471762
 Daging Ayam Ras Segar,Sulawesi Tenggara,2026-11-13,-13.488975356679633
@@ -212,13 +212,13 @@ Beras Kualitas Medium II,Sulawesi Barat,2026-11-13,-11.782477341389729
 Cabai Rawit Hijau,Kalimantan Timur,2026-11-13,11.752988047808755
 Beras Kualitas Super II,Sulawesi Selatan,2026-11-13,-11.71428571428571
 Bawang Merah Ukuran Sedang,Kalimantan Barat,2026-11-13,11.695137976346913
-Telur Ayam Ras Segar,Gorontalo,2026-11-13,11.683848797250862
 Telur Ayam Ras Segar,Lampung,2026-11-13,-11.683848797250862
+Telur Ayam Ras Segar,Gorontalo,2026-11-13,11.683848797250862
 Beras Kualitas Super I,Nusa Tenggara Barat,2026-11-13,-11.634349030470915
-Gula Pasir Kualitas Premium,Riau,2026-11-13,-11.566265060240966
 Gula Pasir Kualitas Premium,Maluku,2026-11-13,11.566265060240966
-Bawang Merah Ukuran Sedang,Kalimantan Utara,2026-11-13,11.43232588699079
+Gula Pasir Kualitas Premium,Riau,2026-11-13,-11.566265060240966
 Bawang Merah Ukuran Sedang,Gorontalo,2026-11-13,11.43232588699079
+Bawang Merah Ukuran Sedang,Kalimantan Utara,2026-11-13,11.43232588699079
 Daging Ayam Ras Segar,Gorontalo,2026-11-13,-11.413748378728927
 Bawang Putih Ukuran Sedang,Sumatera Utara,2026-11-13,-11.298701298701296
 Bawang Putih Ukuran Sedang,Kalimantan Selatan,2026-11-13,-11.298701298701296
@@ -247,9 +247,9 @@ Beras Kualitas Bawah II,Nusa Tenggara Timur,2026-11-13,-10.77441077441077
 Minyak Goreng Kemasan Bermerk 2,Maluku,2026-11-13,10.759493670886066
 Beras Kualitas Medium I,Sulawesi Selatan,2026-11-13,-10.746268656716417
 Bawang Merah Ukuran Sedang,Sumatera Barat,2026-11-13,-10.643889618922476
-Beras Kualitas Bawah I,Sumatera Barat,2026-11-13,10.6312292358804
 Beras Kualitas Bawah I,Sulawesi Selatan,2026-11-13,-10.6312292358804
 Beras Kualitas Bawah I,Sumatera Utara,2026-11-13,-10.6312292358804
+Beras Kualitas Bawah I,Sumatera Barat,2026-11-13,10.6312292358804
 Cabai Merah Besar,Bengkulu,2026-11-13,10.537951363301401
 Daging Sapi Kualitas 1,Sulawesi Selatan,2026-11-13,-10.498858819693513
 Minyak Goreng Kemasan Bermerk 1,Kepulauan Bangka Belitung,2026-11-13,-10.429447852760731
@@ -274,8 +274,8 @@ Daging Sapi Kualitas 1,Kalimantan Timur,2026-11-13,9.488099119660909
 Beras Kualitas Bawah II,Sulawesi Selatan,2026-11-13,-9.427609427609429
 Beras Kualitas Super I,Maluku Utara,2026-11-13,9.418282548476453
 Telur Ayam Ras Segar,Kalimantan Tengah,2026-11-13,9.278350515463906
-Beras Kualitas Super I,Kalimantan Selatan,2026-11-13,9.141274238227147
 Beras Kualitas Super I,Aceh,2026-11-13,-9.141274238227147
+Beras Kualitas Super I,Kalimantan Selatan,2026-11-13,9.141274238227147
 Bawang Merah Ukuran Sedang,Jawa Barat,2026-11-13,-9.06701708278581
 Minyak Goreng Kemasan Bermerk 1,Kalimantan Tengah,2026-11-13,8.997955010224956
 Beras Kualitas Bawah I,Sulawesi Barat,2026-11-13,-8.97009966777409
@@ -305,8 +305,8 @@ Beras Kualitas Medium II,Jawa Tengah,2026-11-13,-8.157099697885196
 Minyak Goreng Curah,Bali,2026-11-13,8.108108108108114
 Cabai Merah Besar,Kalimantan Timur,2026-11-13,8.106116433308763
 Beras Kualitas Medium I,DI Yogyakarta,2026-11-13,-8.059701492537318
-Daging Sapi Kualitas 2,Kalimantan Tengah,2026-11-13,8.052759458521352
 Daging Sapi Kualitas 2,Papua,2026-11-13,8.052759458521352
+Daging Sapi Kualitas 2,Kalimantan Tengah,2026-11-13,8.052759458521352
 Bawang Putih Ukuran Sedang,Lampung,2026-11-13,-8.051948051948054
 Daging Ayam Ras Segar,Jawa Timur,2026-11-13,-7.9118028534371
 Daging Sapi Kualitas 1,Sulawesi Tenggara,2026-11-13,-7.890446690577113
@@ -326,11 +326,11 @@ Beras Kualitas Super II,Sumatera Barat,2026-11-13,7.428571428571429
 Cabai Merah Besar,Lampung,2026-11-13,-7.295504789977891
 Beras Kualitas Super I,Sulawesi Tenggara,2026-11-13,-7.202216066481992
 Minyak Goreng Kemasan Bermerk 2,Sulawesi Barat,2026-11-13,7.1729957805907185
-Daging Sapi Kualitas 2,Sumatera Utara,2026-11-13,-7.150295036445675
 Daging Sapi Kualitas 2,Kalimantan Utara,2026-11-13,-7.150295036445675
+Daging Sapi Kualitas 2,Sumatera Utara,2026-11-13,-7.150295036445675
 Beras Kualitas Super II,Papua Barat,2026-11-13,7.14285714285714
-Bawang Putih Ukuran Sedang,Maluku,2026-11-13,7.14285714285714
 Beras Kualitas Super II,Maluku Utara,2026-11-13,7.14285714285714
+Bawang Putih Ukuran Sedang,Maluku,2026-11-13,7.14285714285714
 Daging Sapi Kualitas 1,Maluku,2026-11-13,-7.07531790022824
 Telur Ayam Ras Segar,Nusa Tenggara Timur,2026-11-13,7.0446735395188975
 Cabai Merah Keriting,Sulawesi Barat,2026-11-13,-7.00296735905045
@@ -344,8 +344,8 @@ Minyak Goreng Curah,Gorontalo,2026-11-13,6.87960687960687
 Gula Pasir Lokal,Maluku Utara,2026-11-13,6.870229007633588
 Beras Kualitas Medium I,Sumatera Utara,2026-11-13,-6.8656716417910495
 Minyak Goreng Kemasan Bermerk 2,Jawa Tengah,2026-11-13,-6.751054852320671
-Minyak Goreng Kemasan Bermerk 1,Sumatera Utara,2026-11-13,-6.748466257668717
 Minyak Goreng Kemasan Bermerk 1,Riau,2026-11-13,-6.748466257668717
+Minyak Goreng Kemasan Bermerk 1,Sumatera Utara,2026-11-13,-6.748466257668717
 Minyak Goreng Curah,Sulawesi Tenggara,2026-11-13,-6.633906633906639
 Beras Kualitas Medium I,Papua Barat,2026-11-13,6.567164179104479
 Gula Pasir Kualitas Premium,Sumatera Selatan,2026-11-13,-6.506024096385543
@@ -367,8 +367,8 @@ Beras Kualitas Super I,Sumatera Barat,2026-11-13,6.094182825484773
 Gula Pasir Kualitas Premium,Maluku Utara,2026-11-13,6.024096385542177
 Gula Pasir Kualitas Premium,Jawa Tengah,2026-11-13,-6.024096385542165
 Beras Kualitas Super II,Jawa Barat,2026-11-13,-6.000000000000005
-Beras Kualitas Medium I,Aceh,2026-11-13,-5.970149253731338
 Beras Kualitas Medium I,Bali,2026-11-13,-5.970149253731338
+Beras Kualitas Medium I,Aceh,2026-11-13,-5.970149253731338
 Daging Sapi Kualitas 1,DI Yogyakarta,2026-11-13,5.966742745353759
 Bawang Merah Ukuran Sedang,Sumatera Utara,2026-11-13,-5.9132720105124825
 Daging Sapi Kualitas 1,Lampung,2026-11-13,-5.836322138897943
@@ -383,16 +383,16 @@ Cabai Rawit Merah,Kalimantan Timur,2026-11-13,-5.578512396694213
 Gula Pasir Kualitas Premium,Kalimantan Utara,2026-11-13,-5.5421686746988
 Minyak Goreng Kemasan Bermerk 1,Lampung,2026-11-13,-5.521472392638039
 Telur Ayam Ras Segar,Sulawesi Utara,2026-11-13,5.498281786941583
-Beras Kualitas Super II,Jawa Tengah,2026-11-13,-5.428571428571427
 Beras Kualitas Super II,Bali,2026-11-13,-5.428571428571427
+Beras Kualitas Super II,Jawa Tengah,2026-11-13,-5.428571428571427
 Daging Sapi Kualitas 2,Sulawesi Tenggara,2026-11-13,-5.414786532454007
 Minyak Goreng Curah,Lampung,2026-11-13,5.405405405405395
 Minyak Goreng Curah,Jawa Barat,2026-11-13,5.405405405405395
 Beras Kualitas Bawah II,Kalimantan Tengah,2026-11-13,5.387205387205385
 Beras Kualitas Medium I,Jawa Barat,2026-11-13,-5.3731343283582085
 Cabai Merah Besar,Jambi,2026-11-13,-5.3058216654384704
-Gula Pasir Kualitas Premium,Lampung,2026-11-13,-5.301204819277105
 Gula Pasir Kualitas Premium,Kepulauan Bangka Belitung,2026-11-13,-5.301204819277105
+Gula Pasir Kualitas Premium,Lampung,2026-11-13,-5.301204819277105
 Beras Kualitas Super I,Papua Barat,2026-11-13,5.263157894736836
 Telur Ayam Ras Segar,Kalimantan Barat,2026-11-13,5.154639175257736
 Daging Sapi Kualitas 1,Bali,2026-11-13,-5.151613955004885
@@ -400,9 +400,9 @@ Beras Kualitas Super II,Riau,2026-11-13,5.142857142857138
 Beras Kualitas Super II,Kalimantan Barat,2026-11-13,5.142857142857138
 Bawang Merah Ukuran Sedang,Sulawesi Tenggara,2026-11-13,5.124835742444156
 Bawang Merah Ukuran Sedang,Maluku,2026-11-13,5.124835742444156
-Minyak Goreng Kemasan Bermerk 1,Sulawesi Utara,2026-11-13,-5.112474437627812
 Minyak Goreng Kemasan Bermerk 1,DKI Jakarta,2026-11-13,-5.112474437627812
 Minyak Goreng Kemasan Bermerk 1,Bali,2026-11-13,-5.112474437627812
+Minyak Goreng Kemasan Bermerk 1,Sulawesi Utara,2026-11-13,-5.112474437627812
 Daging Ayam Ras Segar,Sulawesi Utara,2026-11-13,5.058365758754868
 Daging Ayam Ras Segar,Bali,2026-11-13,5.058365758754868
 Beras Kualitas Bawah II,Jawa Tengah,2026-11-13,-5.05050505050505
@@ -411,18 +411,18 @@ Beras Kualitas Super I,Maluku,2026-11-13,4.986149584487531
 Telur Ayam Ras Segar,Riau,2026-11-13,-4.982817869415812
 Daging Sapi Kualitas 1,Kalimantan Barat,2026-11-13,4.890772742093241
 Bawang Merah Ukuran Sedang,Kepulauan Bangka Belitung,2026-11-13,4.862023653088032
-Gula Pasir Lokal,Bali,2026-11-13,-4.834605597964381
 Gula Pasir Lokal,Sulawesi Utara,2026-11-13,4.834605597964381
+Gula Pasir Lokal,Bali,2026-11-13,-4.834605597964381
 Gula Pasir Kualitas Premium,Jawa Barat,2026-11-13,-4.81927710843374
 Daging Ayam Ras Segar,Kepulauan Bangka Belitung,2026-11-13,4.79896238651103
 Beras Kualitas Medium I,Riau,2026-11-13,4.7761194029850795
 Daging Sapi Kualitas 2,Sulawesi Selatan,2026-11-13,-4.720583130857337
-Beras Kualitas Bawah II,Jawa Barat,2026-11-13,-4.7138047138047146
 Beras Kualitas Bawah II,Sumatera Utara,2026-11-13,-4.7138047138047146
+Beras Kualitas Bawah II,Jawa Barat,2026-11-13,-4.7138047138047146
 Minyak Goreng Kemasan Bermerk 1,Jawa Barat,2026-11-13,-4.703476482617585
 Bawang Putih Ukuran Sedang,Kalimantan Barat,2026-11-13,-4.675324675324677
-Beras Kualitas Bawah I,Bengkulu,2026-11-13,4.651162790697683
 Beras Kualitas Bawah I,Maluku,2026-11-13,4.651162790697683
+Beras Kualitas Bawah I,Bengkulu,2026-11-13,4.651162790697683
 Minyak Goreng Kemasan Bermerk 2,Jawa Barat,2026-11-13,-4.641350210970463
 Cabai Merah Keriting,Kepulauan Bangka Belitung,2026-11-13,4.629080118694362
 Gula Pasir Lokal,Sumatera Selatan,2026-11-13,-4.580152671755721
@@ -437,17 +437,17 @@ Minyak Goreng Curah,Riau,2026-11-13,4.422604422604426
 Beras Kualitas Bawah II,Bali,2026-11-13,4.377104377104368
 Gula Pasir Kualitas Premium,Jambi,2026-11-13,-4.337349397590362
 Gula Pasir Kualitas Premium,Sulawesi Tengah,2026-11-13,4.337349397590362
-Daging Sapi Kualitas 1,Kepulauan Bangka Belitung,2026-11-13,4.336485164656012
-Daging Sapi Kualitas 1,Sumatera Barat,2026-11-13,4.336485164656012
 Daging Sapi Kualitas 1,Bengkulu,2026-11-13,4.336485164656012
 Daging Sapi Kualitas 1,Kalimantan Tengah,2026-11-13,4.336485164656012
-Gula Pasir Lokal,Sulawesi Tengah,2026-11-13,4.325699745547085
+Daging Sapi Kualitas 1,Kepulauan Bangka Belitung,2026-11-13,4.336485164656012
+Daging Sapi Kualitas 1,Sumatera Barat,2026-11-13,4.336485164656012
 Gula Pasir Lokal,Papua Barat,2026-11-13,4.325699745547085
+Gula Pasir Lokal,Sulawesi Tengah,2026-11-13,4.325699745547085
 Bawang Putih Ukuran Sedang,Sulawesi Tengah,2026-11-13,4.285714285714293
-Bawang Putih Ukuran Sedang,Jawa Tengah,2026-11-13,-4.285714285714281
 Beras Kualitas Super II,Lampung,2026-11-13,-4.285714285714281
-Beras Kualitas Medium II,Banten,2026-11-13,-4.229607250755285
+Bawang Putih Ukuran Sedang,Jawa Tengah,2026-11-13,-4.285714285714281
 Beras Kualitas Medium II,Kepulauan Bangka Belitung,2026-11-13,-4.229607250755285
+Beras Kualitas Medium II,Banten,2026-11-13,-4.229607250755285
 Beras Kualitas Medium II,Sulawesi Tenggara,2026-11-13,-4.229607250755285
 Beras Kualitas Medium I,Sulawesi Tenggara,2026-11-13,-4.179104477611939
 Bawang Putih Ukuran Sedang,Kalimantan Tengah,2026-11-13,-4.155844155844157
@@ -460,17 +460,17 @@ Beras Kualitas Bawah II,Jawa Timur,2026-11-13,-4.040404040404044
 Minyak Goreng Kemasan Bermerk 2,Kalimantan Tengah,2026-11-13,4.008438818565407
 Minyak Goreng Kemasan Bermerk 2,Sulawesi Tengah,2026-11-13,4.008438818565407
 Beras Kualitas Super II,Jambi,2026-11-13,4.0000000000000036
-Beras Kualitas Bawah I,Jawa Timur,2026-11-13,-3.9867109634551534
 Beras Kualitas Bawah I,Sumatera Selatan,2026-11-13,-3.9867109634551534
+Beras Kualitas Bawah I,Jawa Timur,2026-11-13,-3.9867109634551534
 Telur Ayam Ras Segar,Sumatera Utara,2026-11-13,3.9518900343642693
 Telur Ayam Ras Segar,Sulawesi Barat,2026-11-13,-3.9518900343642582
 Minyak Goreng Curah,Kalimantan Timur,2026-11-13,3.9312039312039415
 Minyak Goreng Curah,Sulawesi Selatan,2026-11-13,-3.9312039312039304
 Beras Kualitas Medium II,Sumatera Utara,2026-11-13,-3.92749244712991
 Minyak Goreng Kemasan Bermerk 1,Sulawesi Selatan,2026-11-13,-3.885480572597133
-Beras Kualitas Medium I,Kalimantan Timur,2026-11-13,3.88059701492538
-Beras Kualitas Medium I,Kalimantan Barat,2026-11-13,3.88059701492538
 Beras Kualitas Medium I,Jambi,2026-11-13,3.88059701492538
+Beras Kualitas Medium I,Kalimantan Barat,2026-11-13,3.88059701492538
+Beras Kualitas Medium I,Kalimantan Timur,2026-11-13,3.88059701492538
 Beras Kualitas Medium I,Jawa Tengah,2026-11-13,-3.880597014925369
 Bawang Merah Ukuran Sedang,Banten,2026-11-13,3.8107752956636043
 Daging Sapi Kualitas 1,Kalimantan Utara,2026-11-13,3.782197587218783
@@ -478,8 +478,8 @@ Daging Sapi Kualitas 2,Sulawesi Tengah,2026-11-13,3.713988198542162
 Minyak Goreng Curah,Jawa Timur,2026-11-13,3.6855036855036882
 Beras Kualitas Bawah I,Jawa Tengah,2026-11-13,-3.6544850498338888
 Bawang Putih Ukuran Sedang,Banten,2026-11-13,-3.6363636363636376
-Gula Pasir Kualitas Premium,Banten,2026-11-13,-3.6144578313253017
 Gula Pasir Kualitas Premium,Sumatera Barat,2026-11-13,-3.6144578313253017
+Gula Pasir Kualitas Premium,Banten,2026-11-13,-3.6144578313253017
 Beras Kualitas Super I,Kalimantan Barat,2026-11-13,3.6011080332410073
 Cabai Rawit Merah,Sulawesi Barat,2026-11-13,-3.564049586776863
 Cabai Merah Keriting,Bengkulu,2026-11-13,-3.5608308605341255
@@ -489,13 +489,13 @@ Beras Kualitas Super II,Sumatera Selatan,2026-11-13,-3.4285714285714253
 Gula Pasir Kualitas Premium,Sulawesi Selatan,2026-11-13,-3.3734939759036187
 Beras Kualitas Bawah II,DKI Jakarta,2026-11-13,-3.367003367003363
 Beras Kualitas Super I,Jawa Barat,2026-11-13,-3.3240997229916913
-Beras Kualitas Medium II,Kalimantan Barat,2026-11-13,3.3232628398791597
 Beras Kualitas Medium II,Sulawesi Utara,2026-11-13,3.3232628398791597
+Beras Kualitas Medium II,Kalimantan Barat,2026-11-13,3.3232628398791597
 Beras Kualitas Medium II,Lampung,2026-11-13,-3.3232628398791486
 Beras Kualitas Bawah I,Kalimantan Barat,2026-11-13,3.322259136212624
-Gula Pasir Lokal,DI Yogyakarta,2026-11-13,-3.30788804071247
-Gula Pasir Lokal,Sulawesi Selatan,2026-11-13,-3.30788804071247
 Gula Pasir Lokal,Lampung,2026-11-13,-3.30788804071247
+Gula Pasir Lokal,Sulawesi Selatan,2026-11-13,-3.30788804071247
+Gula Pasir Lokal,DI Yogyakarta,2026-11-13,-3.30788804071247
 Beras Kualitas Medium I,Kalimantan Utara,2026-11-13,3.2835820895522394
 Daging Ayam Ras Segar,Jawa Barat,2026-11-13,-3.242542153047989
 Daging Sapi Kualitas 2,Kepulauan Bangka Belitung,2026-11-13,-3.2280458174245075
